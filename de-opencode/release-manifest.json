@@ -1,0 +1,263 @@
+{
+  "name": "de-opencode",
+  "version": "0.7.0",
+  "layout": "opencode-config-dir",
+  "file_count": 51,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3462,
+      "sha256": "1feba78549e8130ad7425fc9355a365628be4b8529f9dd5b6a66be0e2a9b930c"
+    },
+    {
+      "path": "VERSION",
+      "bytes": 6,
+      "sha256": "967d9afb101346667166f2e76e81910bc190488d7d41d50ca0072e9d92f00e32"
+    },
+    {
+      "path": "agents/data-architect.md",
+      "bytes": 684,
+      "sha256": "fd471c23eee8d9baa7be53ee1dc89906c6e7885fc8a8ff1f89e5e2db391903e0"
+    },
+    {
+      "path": "agents/data-devops.md",
+      "bytes": 961,
+      "sha256": "1b45279e7a9db565377bafa48064a549bcb31e6a1e3f7c5737823dbe9e120a9d"
+    },
+    {
+      "path": "agents/data-engineer.md",
+      "bytes": 1904,
+      "sha256": "65f11a202947f9cba592a4a8e065651d12e5d75f81f1dbe94d773f20ebb63864"
+    },
+    {
+      "path": "docs/client-faq.md",
+      "bytes": 1642,
+      "sha256": "88af715b0701be4247e76f48d128e6c63799ce96710c6709618f4d848932efbc"
+    },
+    {
+      "path": "docs/databricks.md",
+      "bytes": 1897,
+      "sha256": "6eaf094ff89eb9405ff4e51efbcc90e77fa7205f33eb738031d96caafbd07a4b"
+    },
+    {
+      "path": "docs/pipeline-doctor.md",
+      "bytes": 1358,
+      "sha256": "c390ac0b93cbc67f6dc6ee831af919ba36c2ba33f61d4a476d66f0d54a93ca11"
+    },
+    {
+      "path": "docs/release-checklist.md",
+      "bytes": 1720,
+      "sha256": "8e85db5f92fa69bb3ec3a12bef29928ae96e4566b543f67e5fd96101a8c5a074"
+    },
+    {
+      "path": "docs/security-model.md",
+      "bytes": 1956,
+      "sha256": "43bcaa4473594c5d476cc407d199bd3a86a0ed4c60a41db17a2a98c742583956"
+    },
+    {
+      "path": "docs/user-manual.md",
+      "bytes": 11608,
+      "sha256": "6c56a77278edbf971cbd24a44b6c65b89770fc67e6f77fdbcb3fa5fe6f9abebe"
+    },
+    {
+      "path": "docs/ux-guide.md",
+      "bytes": 1696,
+      "sha256": "7a78519f8030df9eb745853a3a6966e3f0f6e279295c5522f21192ea426274ff"
+    },
+    {
+      "path": "docs/verification-evidence.md",
+      "bytes": 7829,
+      "sha256": "67f5554d3999525c157850dff5139848f8e40c0cb1f6f345f56d0aab730142b2"
+    },
+    {
+      "path": "docs/windows-11-install.md",
+      "bytes": 1888,
+      "sha256": "0d2c769c58b07948938e33a4c004385bbd90d688191400ba1ff7297457422709"
+    },
+    {
+      "path": "docs/workbench.md",
+      "bytes": 1444,
+      "sha256": "84439b2d8276532d0d2db5046707d6efe702bda21a193726c6a0fb4bff086d33"
+    },
+    {
+      "path": "install-wsl.sh",
+      "bytes": 1545,
+      "sha256": "f242bfdbeda9fe4d1f5b04922a6ad27d1f2941a1aa14caf0ca251fe13bb63e1a"
+    },
+    {
+      "path": "install.ps1",
+      "bytes": 3133,
+      "sha256": "c1115249a5df5c72ae3b3f07aa907ad071a186135481cde5664ae336ad6dd260"
+    },
+    {
+      "path": "opencode.json",
+      "bytes": 6013,
+      "sha256": "3ad3731d48032183bf773838b346246e30a8f99988cc6431e18699ccbf1849fe"
+    },
+    {
+      "path": "plugins/de-guardrails.ts",
+      "bytes": 17696,
+      "sha256": "c9049c55a10d62d61fb45b058821174bec7286ea53e58b1604a25ed19e4f8451"
+    },
+    {
+      "path": "samples/ado-pipeline/azure-pipelines.bad.yml",
+      "bytes": 306,
+      "sha256": "2f17e893c589ba534f9df9909f92a15c091b59041179cc4eddcd52b0c55ccd7a"
+    },
+    {
+      "path": "samples/ado-pipeline/azure-pipelines.good.yml",
+      "bytes": 588,
+      "sha256": "aa1ca06c183aece249cde9a50da20bba1806e38553c0736e694f8d2e9c8d6d47"
+    },
+    {
+      "path": "samples/ado-pipeline/build-failure.log",
+      "bytes": 358,
+      "sha256": "70ca5a706ad9c4b11010c3660fc27ecb703ea44dfd00641e2e37e0cf247545cc"
+    },
+    {
+      "path": "samples/ado-work-items/bulk-updates.csv",
+      "bytes": 136,
+      "sha256": "2f11c74597b1b40fcd28cb8ba73c597fb922a338b823171d1e42720a43355c26"
+    },
+    {
+      "path": "samples/ado-work-items/sprint-items.json",
+      "bytes": 940,
+      "sha256": "341835397bae0215909cc5622994cbba801b4491140e12ccdc03d7b49748b2eb"
+    },
+    {
+      "path": "samples/databricks-bundle/databricks.bad.yml",
+      "bytes": 475,
+      "sha256": "528da0fb5d315637784a49d5bba558ccc04badbe1087cf3c11793cad28c1e406"
+    },
+    {
+      "path": "samples/databricks-bundle/databricks.good.yml",
+      "bytes": 551,
+      "sha256": "88ffdb964ccf7ba4307aeaafaa4461bcb0196e9030f4a8b498f4a2e0526041e3"
+    },
+    {
+      "path": "samples/migration/object-map.json",
+      "bytes": 414,
+      "sha256": "fa991b284d74cae095e4cf50302fa01859a543b1b528d89ca0652dbf1949531d"
+    },
+    {
+      "path": "samples/mssql/inventory.json",
+      "bytes": 533,
+      "sha256": "ae205bbb642d01bdb017e32aba68e26be346bafacb28841476d088f579473e59"
+    },
+    {
+      "path": "skills/de-ado-devops/SKILL.md",
+      "bytes": 2203,
+      "sha256": "019607c90b23a000a89e0070652c5329dea2769a455e4f0ed09ed3f13c9949b3"
+    },
+    {
+      "path": "skills/de-databricks/SKILL.md",
+      "bytes": 3584,
+      "sha256": "3eb76c140de82bf2541373e87de2be2c7f5c41a59edf824c6e571213640b2579"
+    },
+    {
+      "path": "skills/de-migration-wiki/SKILL.md",
+      "bytes": 1154,
+      "sha256": "50c47daa76d609062ee240707ae0367a3e5b290038c4bae9d3a50a4c31118452"
+    },
+    {
+      "path": "skills/de-mssql/SKILL.md",
+      "bytes": 1486,
+      "sha256": "669673cabf249dbc3b7679fa5c82b6d169c720c54d04cfe6687b7fcd16af9ff9"
+    },
+    {
+      "path": "skills/de-quality-gates/SKILL.md",
+      "bytes": 1753,
+      "sha256": "4f56bfb9dc73fd0afc83f7d07a4f63ebecd2e88a7eb4b6e3ceac56e6427acf2e"
+    },
+    {
+      "path": "skills/de-security-review/SKILL.md",
+      "bytes": 1278,
+      "sha256": "18a38cecc1310994794e0eab2078882315455a4759beb4f859dda9007af7460c"
+    },
+    {
+      "path": "skills/de-task-triage/SKILL.md",
+      "bytes": 1444,
+      "sha256": "8b117a47ec349730ddbfff70bf0ba6353ba56a9f766dce57ce64c861b4af4e7a"
+    },
+    {
+      "path": "smoke.ps1",
+      "bytes": 1919,
+      "sha256": "ecf5282aa529ddd8d15c6081a048bfdda8658833ad52df9dac15de431c1e7f84"
+    },
+    {
+      "path": "templates/azure-pipelines/databricks-bundle-ci.yml",
+      "bytes": 2597,
+      "sha256": "9546f489e547ccf35d8c67a34f63c318e34dcce2a851b2d345c78af6f74aa2e7"
+    },
+    {
+      "path": "tests/security_package.py",
+      "bytes": 6555,
+      "sha256": "22b56694b4b61833806af10536d995d15400a6a1a276648851fc090bf83964e8"
+    },
+    {
+      "path": "tests/smoke.py",
+      "bytes": 8831,
+      "sha256": "623a836ee74cd024cfedaf7aba6dcb0dae94dee51414ba752b2434b09f5248d1"
+    },
+    {
+      "path": "tools/__init__.py",
+      "bytes": 48,
+      "sha256": "7d643556e04e344e7aefd10aceec9622ba572b9168718789fce4c16ef29b4a2e"
+    },
+    {
+      "path": "tools/de.py",
+      "bytes": 28568,
+      "sha256": "aa3c28616d42f8f30e1091bf2061cc5bf4d7ef4bbb4b1ce436abf64b8e48d607"
+    },
+    {
+      "path": "tools/de_ado.py",
+      "bytes": 2381,
+      "sha256": "70871d7908d9a5aa77eeef4fd8d7c16e00fe42c66f12a91b6802e7e3894ea8af"
+    },
+    {
+      "path": "tools/de_config.py",
+      "bytes": 10919,
+      "sha256": "5aaf9f56f3d0be67a358432d4bbccb040feecd319d624e9c3b21acc57274951a"
+    },
+    {
+      "path": "tools/de_databricks.py",
+      "bytes": 11199,
+      "sha256": "589f12792917f1c2b8ba5084cfa1b8691fc40d9b837449a5a3d0fb0b6c979e88"
+    },
+    {
+      "path": "tools/de_dbsql.py",
+      "bytes": 5575,
+      "sha256": "b9e4742de491c64c875e9b72d3edfcfccbe248f42af19ddb08c758dcee336bf9"
+    },
+    {
+      "path": "tools/de_ledger.py",
+      "bytes": 3812,
+      "sha256": "f05f1bea9925892098b35306c3aec6905b293ea9b6725ab2dd7cb4c92c081f40"
+    },
+    {
+      "path": "tools/de_mssql.py",
+      "bytes": 3786,
+      "sha256": "23fb841ed7f23bedd47b22cda46a61a355fb4fe04afb54d0064adc83cafcd46f"
+    },
+    {
+      "path": "tools/de_pipeline.py",
+      "bytes": 13513,
+      "sha256": "27a4cca221c73349403ee357ff7b4e6da34747e355bc87f0e9ab08dfefd96aa4"
+    },
+    {
+      "path": "tools/de_quality.py",
+      "bytes": 4548,
+      "sha256": "51b933f3fb2838208a7b7fd49a18ec416431008aa09946fa12d73aee67cbed60"
+    },
+    {
+      "path": "tools/de_release.py",
+      "bytes": 3559,
+      "sha256": "748ae9d27216dd9e2bcd445875a7a9e50c90fc989111d6db37e18009f1dc5922"
+    },
+    {
+      "path": "tools/de_workbench.py",
+      "bytes": 20307,
+      "sha256": "7e4bd87f1a8b410d6046fd75276727693a3c447027e304155adc4b36e83c2758"
+    }
+  ]
+}

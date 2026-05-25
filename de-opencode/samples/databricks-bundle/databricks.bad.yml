@@ -1,0 +1,23 @@
+bundle:
+  name: risky-prod-bundle
+
+variables:
+  databricks_token: sample-token
+
+targets:
+  prod:
+    workspace:
+      host: https://example-workspace.azuredatabricks.net
+
+resources:
+  jobs:
+    risky_job:
+      name: risky-job
+      tasks:
+        - task_key: transform
+          notebook_task:
+            notebook_path: ../src/transform
+          new_cluster:
+            spark_version: 18.0.x-scala2.13
+            node_type_id: Standard_DS3_v2
+            num_workers: 2

@@ -1,0 +1,25 @@
+bundle:
+  name: customer-etl
+
+targets:
+  dev:
+    mode: development
+    workspace:
+      root_path: /Shared/.bundle/customer-etl/dev
+  prod:
+    mode: production
+    workspace:
+      root_path: /Shared/.bundle/customer-etl/prod
+
+resources:
+  jobs:
+    daily_customer_etl:
+      name: daily-customer-etl
+      tasks:
+        - task_key: transform
+          notebook_task:
+            notebook_path: ../src/transform
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            node_type_id: Standard_DS3_v2
+            num_workers: 2

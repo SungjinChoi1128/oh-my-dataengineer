@@ -1,0 +1,38 @@
+[
+  {
+    "id": 101,
+    "type": "User Story",
+    "title": "Ingest Orders to Bronze",
+    "state": "New",
+    "assigned_to": "data.engineer@example.com",
+    "iteration": "Project\\Sprint 12",
+    "estimate": 5,
+    "acceptance_criteria": "Orders land in bronze with audit columns and row-count evidence.",
+    "child_task_count": 4,
+    "last_updated_days": 1
+  },
+  {
+    "id": 102,
+    "type": "User Story",
+    "title": "Migrate Customer dimension",
+    "state": "Active",
+    "assigned_to": "",
+    "iteration": "Project\\Sprint 12",
+    "estimate": "",
+    "acceptance_criteria": "",
+    "child_task_count": 0,
+    "last_updated_days": 9
+  },
+  {
+    "id": 103,
+    "type": "Bug",
+    "title": "Pipeline fails on Databricks CLI install",
+    "state": "Active",
+    "assigned_to": "devops@example.com",
+    "iteration": "",
+    "estimate": 2,
+    "acceptance_criteria": "",
+    "child_task_count": 0,
+    "last_updated_days": 2
+  }
+]

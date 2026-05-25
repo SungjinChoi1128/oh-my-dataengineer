@@ -1,0 +1,5 @@
+id,field,current,value
+101,state,New,Active
+102,assigned_to,,data.engineer@example.com
+102,estimate,,8
+103,iteration,,Project\Sprint 12

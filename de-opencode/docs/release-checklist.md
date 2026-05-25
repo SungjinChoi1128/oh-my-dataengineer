@@ -1,0 +1,22 @@
+# Release Checklist
+
+- Run `python3 de-opencode/tests/smoke.py`.
+- Run `python3 de-opencode/tests/security_package.py`.
+- Run `de demo pipeline-doctor --format markdown --out <temp-evidence-dir>`.
+- Run `de workbench catalog` and `de workbench triage`.
+- Run `de ado refine`, `de ado bulk preview`, `de mssql assess`, `de migration plan`, `de security checklist`, and `de quality readiness` against samples.
+- Run `de databricks bundle-doctor` against good and bad sample bundle files.
+- Run `de databricks runtime-advisor` for a major-version production upgrade scenario.
+- Run Pipeline Doctor against both sample YAML files and confirm unsafe samples exit nonzero.
+- Run `env PYTHONPYCACHEPREFIX=/private/tmp/de-opencode-pycache python3 -m compileall de-opencode/tools de-opencode/tests`.
+- Run `python3 de-opencode/tools/de_release.py manifest --root de-opencode --out de-opencode/release-manifest.json`.
+- Run `python3 de-opencode/tools/de_release.py verify --root de-opencode`.
+- Run `env HOME=<temp-home> sh de-opencode/install-wsl.sh <temp-install>`.
+- Run installed wrappers: `de doctor`, `de demo pipeline-doctor`, and `de release verify --root <temp-install>`.
+- Secret scan markdown, JSON, TypeScript, PowerShell, shell, and Python files.
+- Confirm `install.ps1` includes `.cmd` and `.ps1` wrapper generation.
+- Confirm `install.ps1` and `install-wsl.sh` expose the `de` umbrella command.
+- Confirm `install.ps1` and `install-wsl.sh` expose `de-databricks`.
+- Confirm `install.ps1` and `install-wsl.sh` expose `de-workbench`.
+- Confirm `de-quality-gates` exists and is referenced by the agents/skills.
+- Confirm no real client names, hosts, tokens, users, database names, or connection strings are committed.

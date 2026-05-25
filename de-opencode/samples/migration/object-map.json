@@ -1,0 +1,20 @@
+[
+  {
+    "source": "dbo.Customer",
+    "target": "main.crm.customer",
+    "type": "table",
+    "risk": ""
+  },
+  {
+    "source": "dbo.usp_LoadCustomers",
+    "target": "",
+    "type": "procedure",
+    "risk": "dynamic sql requires rewrite design"
+  },
+  {
+    "source": "ssis/LoadOrders.dtsx",
+    "target": "jobs.load_orders",
+    "type": "ssis-package",
+    "risk": "schedule and retry policy not mapped"
+  }
+]

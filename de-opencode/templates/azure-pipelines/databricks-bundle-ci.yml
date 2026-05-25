@@ -1,0 +1,84 @@
+# Databricks Bundle CI/CD template for de-opencode.
+# Copy into a client repo and bind variable groups/service connections externally.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  - group: de-databricks-nonprod
+  - name: BUNDLE_TARGET
+    value: dev
+
+stages:
+  - stage: Validate
+    displayName: Validate bundle and package controls
+    jobs:
+      - job: validate
+        displayName: Validate
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.11"
+          - script: |
+              python -m compileall de-opencode/tools de-opencode/tests
+              python de-opencode/tests/smoke.py
+              python de-opencode/tests/security_package.py
+            displayName: de-opencode package smoke
+          - script: |
+              databricks bundle validate -t $(BUNDLE_TARGET)
+            displayName: Databricks bundle validate
+            env:
+              DATABRICKS_HOST: $(DATABRICKS_HOST)
+              DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+  - stage: DeployDev
+    displayName: Deploy dev bundle
+    dependsOn: Validate
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: deploy_dev
+        displayName: Deploy dev
+        environment: de-dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    databricks bundle validate -t dev
+                    databricks bundle deploy -t dev
+                  displayName: Deploy Databricks bundle to dev
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+  - stage: DeployProd
+    displayName: Deploy prod bundle
+    dependsOn: DeployDev
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: deploy_prod
+        displayName: Deploy prod
+        environment: de-prod-approval-required
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    databricks bundle validate -t prod
+                    databricks bundle deploy -t prod
+                  displayName: Deploy Databricks bundle to prod
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)

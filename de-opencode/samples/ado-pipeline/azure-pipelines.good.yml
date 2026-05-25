@@ -1,0 +1,27 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  - group: de-databricks-nonprod
+  - name: BUNDLE_TARGET
+    value: dev
+
+stages:
+  - stage: Validate
+    jobs:
+      - job: validate
+        steps:
+          - script: |
+              databricks bundle validate -t $(BUNDLE_TARGET)
+            displayName: Validate Databricks bundle
+  - stage: DeployDev
+    dependsOn: Validate
+    jobs:
+      - job: deploy_dev
+        steps:
+          - script: |
+              databricks bundle validate -t dev
+              databricks bundle deploy -t dev
+            displayName: Deploy dev

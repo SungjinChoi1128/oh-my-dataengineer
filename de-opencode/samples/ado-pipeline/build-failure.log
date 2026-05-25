@@ -1,0 +1,8 @@
+Starting: Deploy Databricks bundle
+==============================================================================
+Task         : Command line
+==============================================================================
+databricks bundle deploy -t prod
+databricks: command not found
+##[error]Bash exited with code '127'.
+Finishing: Deploy Databricks bundle

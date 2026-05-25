@@ -1,0 +1,25 @@
+{
+  "objects": [
+    {
+      "name": "dbo.usp_LoadCustomers",
+      "type": "procedure",
+      "uses_dynamic_sql": true,
+      "uses_linked_server": false,
+      "uses_sql_agent": true
+    },
+    {
+      "name": "dbo.Customer",
+      "type": "table",
+      "uses_dynamic_sql": false,
+      "uses_linked_server": false,
+      "uses_sql_agent": false
+    },
+    {
+      "name": "dbo.usp_SyncOrders",
+      "type": "procedure",
+      "uses_dynamic_sql": false,
+      "uses_linked_server": true,
+      "uses_sql_agent": true
+    }
+  ]
+}

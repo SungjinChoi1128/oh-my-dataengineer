@@ -1,0 +1,15 @@
+trigger:
+  - main
+
+variables:
+  DATABRICKS_TOKEN: inline-token-example
+
+stages:
+  - stage: DeployProd
+    jobs:
+      - job: deploy
+        steps:
+          - script: |
+              databricks bundle deploy -t prod
+              sqlcmd -Q "DELETE FROM dbo.Customer"
+            displayName: Unsafe deploy
