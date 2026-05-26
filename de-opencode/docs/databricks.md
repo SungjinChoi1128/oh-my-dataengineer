@@ -9,6 +9,8 @@ de databricks bundle-doctor --bundle-yaml databricks.yml --pipeline-yaml azure-p
 de databricks runtime-advisor --current-runtime 15.4 --target-runtime 16.4 --environment prod --uses-delta-writes
 de-dbsql classify --sql "SELECT * FROM main.sales.orders"
 de-dbsql dry-run --sql "MERGE INTO main.sales.orders ..." --environment prod --row-count-checked --confirm-write
+de databricks sql execute --sql "SELECT 1"
+de databricks sql warehouses
 ```
 
 ## Bundle Doctor
@@ -36,6 +38,22 @@ It turns workload shape into required evidence:
 - UDF/JAR/streaming compatibility checks
 - ML/AI serving latency, cost, PII, and data-residency checks
 - rollback plan and production approval
+
+## Live SQL Execution
+
+`de databricks sql execute` executes through the Databricks SQL Statement API. It requires `DATABRICKS_HOST` and either `DATABRICKS_PROFILE` or `DATABRICKS_TOKEN`; profile/OAuth is preferred.
+
+Readonly SQL executes by default:
+
+```bash
+de databricks sql execute --sql "SELECT * FROM main.sales.orders LIMIT 10" --result-format json
+```
+
+Write/admin SQL remains blocked unless you explicitly provide approval/evidence flags:
+
+```bash
+de databricks sql execute --sql "MERGE INTO main.sales.target ..." --allow-write --confirm-write --row-count-checked --environment prod
+```
 
 ## Modern Databricks Feature Awareness
 

@@ -15,7 +15,7 @@ Use `de-opencode` for:
 - QA gates: row-count reconciliation, schema/evidence templates, release readiness, and rollback notes.
 - Client security answers: secret handling, auth posture, OpenCode permissions, and production-change controls.
 
-Do not use it as a silent production executor. It is designed to inspect, classify, preview, and produce evidence first. Actual writes, deploys, reruns, SQL execution, and bulk updates remain explicit and approval-gated.
+Do not use it as a silent production executor. It is designed to inspect, classify, preview, run guarded live reads, and produce evidence first. Actual writes, deploys, reruns, mutating SQL, and bulk updates remain explicit and approval-gated.
 
 ## Install
 
@@ -86,6 +86,7 @@ Security defaults are intentionally conservative:
 - PATs, Databricks tokens, SQL passwords, and connection strings are legacy-compatible fallbacks only.
 - Preferred auth is Microsoft Entra/service principal/managed identity for ADO, Databricks workload identity federation/OAuth/profile, and MSSQL managed/integrated/Entra auth.
 - Dangerous SQL, deploys, pipeline triggers, and bulk ADO updates are approval-gated.
+- Guarded live reads are supported for ADO, Databricks SQL, and MSSQL when the client-approved CLI/auth path is already configured.
 - Evidence reports should not include secrets, full connection strings, client hostnames, or raw sensitive production samples.
 
 `de auth` uses two separate ideas:
@@ -138,6 +139,18 @@ de ado bulk preview --file bulk-updates.csv --out out/ado-bulk-plan.json
 
 The preview shows row-level operations, unusual fields, completion-state risk, and whether approval is required. It does not apply the update.
 
+### Live ADO Read Queries
+
+Use this when Azure CLI and the Azure DevOps extension are already authenticated:
+
+```bash
+de ado query --wiql "SELECT [System.Id], [System.Title], [System.State] FROM WorkItems"
+de ado work-item --id 12345
+de ado pipeline-runs --pipeline-id 42 --top 5
+```
+
+These commands call `az boards` / `az pipelines` and only expose read paths in the `de` front door.
+
 ### Pipeline Doctor
 
 Use this when an Azure Pipeline fails, especially for Databricks bundle deployment or CI/CD failures.
@@ -184,6 +197,22 @@ de-dbsql dry-run --sql "MERGE INTO main.sales.orders ..." --environment prod --r
 
 Production writes require explicit confirmation and evidence. Unity Catalog three-part naming is encouraged for production reads and writes.
 
+### Databricks SQL Live Execution
+
+Use this when `DATABRICKS_HOST` and either `DATABRICKS_PROFILE` or `DATABRICKS_TOKEN` are configured:
+
+```bash
+de databricks sql warehouses
+de databricks sql execute --sql "SELECT 1"
+de databricks sql execute --sql "SELECT * FROM main.sales.orders LIMIT 10" --result-format json
+```
+
+Readonly SQL executes by default. Write/admin SQL requires explicit flags and evidence:
+
+```bash
+de databricks sql execute --sql "MERGE INTO main.sales.target ..." --allow-write --confirm-write --row-count-checked --environment prod
+```
+
 ## MSSQL Workflows
 
 ### SQL Classification
@@ -193,6 +222,21 @@ de-mssql classify --sql "DROP TABLE dbo.Customers"
 ```
 
 Use classification before any execution path. Dangerous or mutating SQL should go through approval and QA gates.
+
+### MSSQL Live Read Query
+
+Use this when `sqlcmd` is installed and client-approved auth is available:
+
+```bash
+de mssql query --sql "SELECT TOP 10 * FROM dbo.Customers" --server sql01 --database EDW --auth-mode integrated
+de mssql query --sql "SELECT TOP 10 * FROM dbo.Customers" --server sql01 --database EDW --auth-mode entra
+```
+
+SQL password auth is possible only with an explicit flag and a password environment variable:
+
+```bash
+de mssql query --sql "SELECT TOP 10 * FROM dbo.Customers" --server sql01 --database EDW --auth-mode sql-password --user svc_user --password-env MSSQL_PASSWORD --allow-sql-password
+```
 
 ### Security Policy Check
 

@@ -1,18 +1,18 @@
 {
   "name": "de-opencode",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "layout": "opencode-config-dir",
   "file_count": 51,
   "files": [
     {
       "path": "README.md",
-      "bytes": 3462,
-      "sha256": "1feba78549e8130ad7425fc9355a365628be4b8529f9dd5b6a66be0e2a9b930c"
+      "bytes": 3907,
+      "sha256": "72fa05930c6d7a6ec58aab36db58081f99f98e6e518c051480d7c5dfcc6fcc64"
     },
     {
       "path": "VERSION",
       "bytes": 6,
-      "sha256": "967d9afb101346667166f2e76e81910bc190488d7d41d50ca0072e9d92f00e32"
+      "sha256": "a66780da23103beaf12432b418508966b31a2a3a787f9468a5b6cdaa8667c1ef"
     },
     {
       "path": "agents/data-architect.md",
@@ -26,8 +26,8 @@
     },
     {
       "path": "agents/data-engineer.md",
-      "bytes": 1904,
-      "sha256": "65f11a202947f9cba592a4a8e065651d12e5d75f81f1dbe94d773f20ebb63864"
+      "bytes": 2226,
+      "sha256": "c626b34ce71448d8376e8e90851932990fbece2ad34510b615625c1dca2c93e6"
     },
     {
       "path": "docs/client-faq.md",
@@ -36,8 +36,8 @@
     },
     {
       "path": "docs/databricks.md",
-      "bytes": 1897,
-      "sha256": "6eaf094ff89eb9405ff4e51efbcc90e77fa7205f33eb738031d96caafbd07a4b"
+      "bytes": 2566,
+      "sha256": "f933bdc2a32294057cab0ad1a0a603046933f732a88f2050c1d825bb245e2079"
     },
     {
       "path": "docs/pipeline-doctor.md",
@@ -56,8 +56,8 @@
     },
     {
       "path": "docs/user-manual.md",
-      "bytes": 11608,
-      "sha256": "6c56a77278edbf971cbd24a44b6c65b89770fc67e6f77fdbcb3fa5fe6f9abebe"
+      "bytes": 13327,
+      "sha256": "d2ea454f93c146f241ce2106ef93ad9a41a2d47a12cab6f9afccb333c3001cf7"
     },
     {
       "path": "docs/ux-guide.md",
@@ -76,8 +76,8 @@
     },
     {
       "path": "docs/workbench.md",
-      "bytes": 1444,
-      "sha256": "84439b2d8276532d0d2db5046707d6efe702bda21a193726c6a0fb4bff086d33"
+      "bytes": 1683,
+      "sha256": "071b07d2560f7233a34e5e9068f275f10ab9c0f72bef7e6ceb4bddbb9fc07d24"
     },
     {
       "path": "install-wsl.sh",
@@ -91,8 +91,8 @@
     },
     {
       "path": "opencode.json",
-      "bytes": 6013,
-      "sha256": "3ad3731d48032183bf773838b346246e30a8f99988cc6431e18699ccbf1849fe"
+      "bytes": 6473,
+      "sha256": "828e478acdeed810984f663f0128b0762c7d4898bfacdeef0ce75006d1db1b92"
     },
     {
       "path": "plugins/de-guardrails.ts",
@@ -191,13 +191,13 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 6555,
-      "sha256": "22b56694b4b61833806af10536d995d15400a6a1a276648851fc090bf83964e8"
+      "bytes": 6890,
+      "sha256": "4333019f6d22a331c9361270825217e9636b18ee871d6f071a3405bebcaf9bfb"
     },
     {
       "path": "tests/smoke.py",
-      "bytes": 8831,
-      "sha256": "623a836ee74cd024cfedaf7aba6dcb0dae94dee51414ba752b2434b09f5248d1"
+      "bytes": 9427,
+      "sha256": "66e31a3ce80efbafd538cd285ff3ff3b851a91d00516b80dc945440c183f6746"
     },
     {
       "path": "tools/__init__.py",
@@ -206,13 +206,13 @@
     },
     {
       "path": "tools/de.py",
-      "bytes": 28568,
-      "sha256": "aa3c28616d42f8f30e1091bf2061cc5bf4d7ef4bbb4b1ce436abf64b8e48d607"
+      "bytes": 34937,
+      "sha256": "9f5ae2eac332f84902679fb607fbdf1e304e69f189fbc63ac2a45768e8b5c1ee"
     },
     {
       "path": "tools/de_ado.py",
-      "bytes": 2381,
-      "sha256": "70871d7908d9a5aa77eeef4fd8d7c16e00fe42c66f12a91b6802e7e3894ea8af"
+      "bytes": 5128,
+      "sha256": "4e43452775f1f1725802809b5eba0b90d7b0ea4537c6fc6bf5c48075d12d8d28"
     },
     {
       "path": "tools/de_config.py",
@@ -226,8 +226,8 @@
     },
     {
       "path": "tools/de_dbsql.py",
-      "bytes": 5575,
-      "sha256": "b9e4742de491c64c875e9b72d3edfcfccbe248f42af19ddb08c758dcee336bf9"
+      "bytes": 15649,
+      "sha256": "6b3fdbf7f7a4acf56bd61fc6ed059303e9a7f8cfebd77f6c65c18ef6a655ccdb"
     },
     {
       "path": "tools/de_ledger.py",
@@ -236,8 +236,8 @@
     },
     {
       "path": "tools/de_mssql.py",
-      "bytes": 3786,
-      "sha256": "23fb841ed7f23bedd47b22cda46a61a355fb4fe04afb54d0064adc83cafcd46f"
+      "bytes": 6935,
+      "sha256": "bec714e0b796c2f53a35d3e5e32ae754dd9e970abf474c8879a9d85eb874e99c"
     },
     {
       "path": "tools/de_pipeline.py",

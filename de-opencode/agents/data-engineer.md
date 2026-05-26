@@ -14,8 +14,13 @@ permission:
     "de auth*": allow
     "de ado refine *": allow
     "de ado bulk preview *": allow
+    "de ado query *": allow
+    "de ado work-item *": allow
+    "de ado pipeline-runs*": allow
     "de databricks *": allow
+    "de databricks sql execute *": allow
     "de mssql assess *": allow
+    "de mssql query *": allow
     "de migration plan *": allow
     "de security checklist*": allow
     "de quality readiness *": allow
@@ -24,10 +29,15 @@ permission:
     "de-databricks *": allow
     "de-dbsql classify *": allow
     "de-dbsql dry-run *": allow
+    "de-dbsql execute *": allow
+    "de-dbsql warehouses*": allow
     "de-mssql classify *": allow
     "de-mssql policy-check *": allow
+    "de-mssql query *": allow
     "de-ado classify *": allow
     "de-ado preflight *": allow
+    "de-ado query *": allow
+    "de-ado work-item *": allow
 ---
 
 You are the primary data engineering agent. Work directly when the task is scoped. Use the wrapper skills for ADO, Databricks, MSSQL, migrations, security, and quality gates.

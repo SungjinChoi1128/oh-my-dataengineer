@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safe MSSQL facade for policy checks and SQL classification."""
+"""Safe MSSQL facade for policy checks, SQL classification, and guarded live reads."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 from typing import List, Optional
 
 
@@ -73,6 +75,56 @@ def cmd_policy_check(args: argparse.Namespace) -> int:
     return 1 if warnings and args.strict else 0
 
 
+def cmd_query(args: argparse.Namespace) -> int:
+    result = classify(args.sql)
+    if result["category"] != "readonly" and not args.allow_dangerous:
+        print(json.dumps({
+            "status": "blocked",
+            "classification": result,
+            "issues": ["Live MSSQL query only allows readonly SQL by default. Use --allow-dangerous only after explicit approval."],
+        }, indent=2))
+        return 1
+    sqlcmd = shutil.which("sqlcmd")
+    if not sqlcmd:
+        raise SystemExit("sqlcmd is required for live MSSQL query execution.")
+    command = [sqlcmd, "-b", "-S", args.server or os.environ.get("MSSQL_SERVER", "")]
+    database = args.database or os.environ.get("MSSQL_DATABASE", "")
+    if database:
+        command += ["-d", database]
+    if args.auth_mode == "integrated":
+        command += ["-E"]
+    elif args.auth_mode == "entra":
+        command += ["-G"]
+    elif args.auth_mode == "sql-password":
+        if not args.allow_sql_password:
+            raise SystemExit("SQL password auth requires --allow-sql-password.")
+        user = args.user or os.environ.get("MSSQL_USER", "")
+        password = os.environ.get(args.password_env or "MSSQL_PASSWORD", "")
+        if not user or not password:
+            raise SystemExit("MSSQL_USER/--user and password env are required for sql-password auth.")
+        command += ["-U", user, "-P", password]
+    if not command[command.index("-S") + 1]:
+        raise SystemExit("MSSQL server is required via --server or MSSQL_SERVER.")
+    bounded_sql = args.sql
+    command += ["-Q", bounded_sql, "-W"]
+    if args.format == "csv":
+        command += ["-s", ","]
+    completed = subprocess.run(command, text=True, capture_output=True, stdin=subprocess.DEVNULL, timeout=args.timeout)
+    if completed.stdout:
+        print(redact(completed.stdout), end="" if completed.stdout.endswith("\n") else "\n")
+    if completed.stderr:
+        print(redact(completed.stderr), end="" if completed.stderr.endswith("\n") else "\n")
+    return completed.returncode
+
+
+def redact(text: str) -> str:
+    clean = text or ""
+    for key, value in os.environ.items():
+        if value and any(token in key.upper() for token in ("PASSWORD", "TOKEN", "SECRET", "PAT", "PWD", "CONNECTIONSTRING")):
+            clean = clean.replace(value, "<redacted>")
+    return clean
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Safe MSSQL policy facade")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -82,6 +134,18 @@ def build_parser() -> argparse.ArgumentParser:
     policy = sub.add_parser("policy-check", help="Check local MSSQL security posture")
     policy.add_argument("--strict", action="store_true")
     policy.set_defaults(func=cmd_policy_check)
+    query = sub.add_parser("query", help="Execute a guarded live MSSQL read-only query through sqlcmd")
+    query.add_argument("--sql", required=True)
+    query.add_argument("--server")
+    query.add_argument("--database")
+    query.add_argument("--auth-mode", choices=["integrated", "entra", "sql-password"], default=os.environ.get("MSSQL_AUTH_MODE", "integrated"))
+    query.add_argument("--user")
+    query.add_argument("--password-env", default="MSSQL_PASSWORD")
+    query.add_argument("--format", choices=["table", "csv"], default="table")
+    query.add_argument("--timeout", type=int, default=60)
+    query.add_argument("--allow-dangerous", action="store_true")
+    query.add_argument("--allow-sql-password", action="store_true")
+    query.set_defaults(func=cmd_query)
     return parser
 
 

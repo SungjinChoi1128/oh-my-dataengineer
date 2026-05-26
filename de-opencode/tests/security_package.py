@@ -43,6 +43,9 @@ def main() -> int:
     assert permissions["bash"]["de demo pipeline-doctor*"] == "allow"
     assert permissions["bash"]["de databricks bundle-doctor *"] == "allow"
     assert permissions["bash"]["de-databricks runtime-advisor *"] == "allow"
+    assert permissions["bash"]["de databricks sql execute *"] == "allow"
+    assert permissions["bash"]["de ado query *"] == "allow"
+    assert permissions["bash"]["de mssql query *"] == "allow"
     assert permissions["bash"]["de ado bulk preview *"] == "allow"
     assert permissions["bash"]["de security checklist*"] == "allow"
     assert permissions["bash"]["de auth*"] == "allow"
@@ -113,6 +116,8 @@ def main() -> int:
     assert "docs/user-manual.md" in read("README.md")
     assert "What You Use It For" in read("docs/user-manual.md")
     assert "Azure DevOps Workflows" in read("docs/user-manual.md")
+    assert "Databricks SQL Live Execution" in read("docs/user-manual.md")
+    assert "MSSQL Live Read Query" in read("docs/user-manual.md")
     assert "`.env` files are not supported" in read("README.md")
     assert "DE_ALLOW_DOTENV=true" not in read("docs/security-model.md")
     assert "local-dev fallback" not in read("skills/de-security-review/SKILL.md")

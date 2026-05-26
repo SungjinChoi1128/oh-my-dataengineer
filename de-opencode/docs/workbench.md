@@ -15,6 +15,7 @@ de workbench triage --request "refine sprint backlog for Databricks migration"
 ```bash
 de ado refine --items-file sprint-items.json
 de ado bulk preview --file bulk-updates.csv --out out/ado-bulk-plan.json
+de ado query --wiql "SELECT [System.Id], [System.Title] FROM WorkItems"
 ```
 
 Use this for backlog refinement, sprint planning, missing acceptance criteria, story/task hygiene, estimates, assignees, stale active work, and safe bulk update previews.
@@ -23,7 +24,9 @@ Use this for backlog refinement, sprint planning, missing acceptance criteria, s
 
 ```bash
 de databricks bundle-doctor --bundle-yaml databricks.yml --pipeline-yaml azure-pipelines.yml
+de databricks sql execute --sql "SELECT 1"
 de mssql assess --metadata-file inventory.json
+de mssql query --sql "SELECT TOP 10 * FROM dbo.Customers" --server sql01 --database EDW
 de migration plan --objects-file object-map.json --source mssql --target databricks
 ```
 
@@ -39,4 +42,4 @@ de security checklist --scope client-review
 
 ## Apply Rule
 
-Workbench commands generate reports and previews. They do not mutate ADO, Databricks, MSSQL, or production systems. Apply steps remain explicit and approval-gated through the underlying client-approved skills/tools.
+Workbench commands generate reports, previews, and guarded live reads. They do not silently mutate ADO, Databricks, MSSQL, or production systems. Apply/write steps remain explicit and approval-gated through the underlying client-approved skills/tools.

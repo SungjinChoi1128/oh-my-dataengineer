@@ -364,6 +364,68 @@ def cmd_databricks_runtime_advisor(args: argparse.Namespace) -> int:
     return code
 
 
+def cmd_databricks_sql_execute(args: argparse.Namespace) -> int:
+    tool_args = ["execute", "--sql", args.sql, "--environment", args.environment, "--format", args.result_format]
+    for flag, value in [
+        ("--warehouse-id", args.warehouse_id),
+        ("--host", args.host),
+        ("--profile", args.profile),
+        ("--timeout", str(args.timeout)),
+        ("--limit", str(args.limit)),
+    ]:
+        if value:
+            tool_args += [flag, value]
+    for flag, enabled in [
+        ("--dry-run-only", args.dry_run_only),
+        ("--allow-write", args.allow_write),
+        ("--confirm-write", args.confirm_write),
+        ("--row-count-checked", args.row_count_checked),
+        ("--allow-unqualified-names", args.allow_unqualified_names),
+    ]:
+        if enabled:
+            tool_args.append(flag)
+    return subprocess.run([sys.executable, str(TOOLS / "de_dbsql.py"), *tool_args]).returncode
+
+
+def cmd_databricks_warehouses(args: argparse.Namespace) -> int:
+    tool_args = ["warehouses", "--format", args.result_format]
+    for flag, value in [("--host", args.host), ("--profile", args.profile)]:
+        if value:
+            tool_args += [flag, value]
+    return subprocess.run([sys.executable, str(TOOLS / "de_dbsql.py"), *tool_args]).returncode
+
+
+def cmd_ado_live(args: argparse.Namespace) -> int:
+    if args.ado_live_command == "query":
+        tool_args = ["query", "--wiql", args.wiql, "--output", args.output]
+    elif args.ado_live_command == "work-item":
+        tool_args = ["work-item", "--id", str(args.id), "--output", args.output]
+    else:
+        tool_args = ["pipeline-runs", "--top", str(args.top), "--output", args.output]
+        if args.pipeline_id:
+            tool_args += ["--pipeline-id", str(args.pipeline_id)]
+    for flag, value in [("--org", args.org), ("--project", args.project)]:
+        if value:
+            tool_args += [flag, value]
+    return subprocess.run([sys.executable, str(TOOLS / "de_ado.py"), *tool_args]).returncode
+
+
+def cmd_mssql_query(args: argparse.Namespace) -> int:
+    tool_args = ["query", "--sql", args.sql, "--auth-mode", args.auth_mode, "--format", args.result_format, "--timeout", str(args.timeout)]
+    for flag, value in [
+        ("--server", args.server),
+        ("--database", args.database),
+        ("--user", args.user),
+        ("--password-env", args.password_env),
+    ]:
+        if value:
+            tool_args += [flag, value]
+    for flag, enabled in [("--allow-dangerous", args.allow_dangerous), ("--allow-sql-password", args.allow_sql_password)]:
+        if enabled:
+            tool_args.append(flag)
+    return subprocess.run([sys.executable, str(TOOLS / "de_mssql.py"), *tool_args]).returncode
+
+
 def render_workbench_text(title: str, data: Dict) -> str:
     status = str(data.get("status", "ok")).upper()
     lines = [f"{title}: {status}"]
@@ -517,6 +579,25 @@ def build_parser() -> argparse.ArgumentParser:
     ado_bulk_preview.add_argument("--out")
     add_format_arg(ado_bulk_preview)
     ado_bulk_preview.set_defaults(func=lambda args: setattr(args, "workbench_command", "ado-bulk-preview") or cmd_workbench_proxy(args))
+    ado_query = ado_sub.add_parser("query", help="Run live read-only ADO WIQL query through Azure CLI")
+    ado_query.add_argument("--wiql", required=True)
+    ado_query.add_argument("--org")
+    ado_query.add_argument("--project")
+    ado_query.add_argument("--output", choices=["json", "table", "yaml"], default="json")
+    ado_query.set_defaults(func=lambda args: setattr(args, "ado_live_command", "query") or cmd_ado_live(args))
+    ado_item = ado_sub.add_parser("work-item", help="Show live ADO work item through Azure CLI")
+    ado_item.add_argument("--id", required=True, type=int)
+    ado_item.add_argument("--org")
+    ado_item.add_argument("--project")
+    ado_item.add_argument("--output", choices=["json", "table", "yaml"], default="json")
+    ado_item.set_defaults(func=lambda args: setattr(args, "ado_live_command", "work-item") or cmd_ado_live(args))
+    ado_runs = ado_sub.add_parser("pipeline-runs", help="List live ADO pipeline runs through Azure CLI")
+    ado_runs.add_argument("--pipeline-id", type=int)
+    ado_runs.add_argument("--top", type=int, default=5)
+    ado_runs.add_argument("--org")
+    ado_runs.add_argument("--project")
+    ado_runs.add_argument("--output", choices=["json", "table", "yaml"], default="json")
+    ado_runs.set_defaults(func=lambda args: setattr(args, "ado_live_command", "pipeline-runs") or cmd_ado_live(args))
 
     pipeline = sub.add_parser("pipeline", help="Pipeline Doctor workflows")
     pipeline_sub = pipeline.add_subparsers(dest="pipeline_command", required=True)
@@ -561,6 +642,28 @@ def build_parser() -> argparse.ArgumentParser:
     db_runtime.add_argument("--uses-ml-serving", action="store_true")
     add_format_arg(db_runtime)
     db_runtime.set_defaults(func=cmd_databricks_runtime_advisor)
+    db_sql = databricks_sub.add_parser("sql", help="Execute guarded live Databricks SQL")
+    db_sql_sub = db_sql.add_subparsers(dest="databricks_sql_command", required=True)
+    db_sql_exec = db_sql_sub.add_parser("execute", help="Execute guarded SQL through Databricks SQL Statement API")
+    db_sql_exec.add_argument("--sql", required=True)
+    db_sql_exec.add_argument("--environment", default="dev")
+    db_sql_exec.add_argument("--warehouse-id")
+    db_sql_exec.add_argument("--host")
+    db_sql_exec.add_argument("--profile")
+    db_sql_exec.add_argument("--timeout", type=int, default=120)
+    db_sql_exec.add_argument("--limit", type=int, default=100)
+    db_sql_exec.add_argument("--result-format", choices=["table", "json", "csv"], default="table")
+    db_sql_exec.add_argument("--dry-run-only", action="store_true")
+    db_sql_exec.add_argument("--allow-write", action="store_true")
+    db_sql_exec.add_argument("--confirm-write", action="store_true")
+    db_sql_exec.add_argument("--row-count-checked", action="store_true")
+    db_sql_exec.add_argument("--allow-unqualified-names", action="store_true")
+    db_sql_exec.set_defaults(func=cmd_databricks_sql_execute)
+    db_wh = db_sql_sub.add_parser("warehouses", help="List live Databricks SQL warehouses")
+    db_wh.add_argument("--host")
+    db_wh.add_argument("--profile")
+    db_wh.add_argument("--result-format", choices=["table", "json"], default="table")
+    db_wh.set_defaults(func=cmd_databricks_warehouses)
 
     quality = sub.add_parser("quality", help="Quality evidence workflows")
     quality_sub = quality.add_subparsers(dest="quality_command", required=True)
@@ -582,6 +685,18 @@ def build_parser() -> argparse.ArgumentParser:
     mssql_assess.add_argument("--metadata-file", required=True)
     add_format_arg(mssql_assess)
     mssql_assess.set_defaults(func=lambda args: setattr(args, "workbench_command", "mssql-assess") or cmd_workbench_proxy(args))
+    mssql_query = mssql_sub.add_parser("query", help="Execute guarded live MSSQL read-only query through sqlcmd")
+    mssql_query.add_argument("--sql", required=True)
+    mssql_query.add_argument("--server")
+    mssql_query.add_argument("--database")
+    mssql_query.add_argument("--auth-mode", choices=["integrated", "entra", "sql-password"], default="integrated")
+    mssql_query.add_argument("--user")
+    mssql_query.add_argument("--password-env", default="MSSQL_PASSWORD")
+    mssql_query.add_argument("--result-format", choices=["table", "csv"], default="table")
+    mssql_query.add_argument("--timeout", type=int, default=60)
+    mssql_query.add_argument("--allow-dangerous", action="store_true")
+    mssql_query.add_argument("--allow-sql-password", action="store_true")
+    mssql_query.set_defaults(func=cmd_mssql_query)
 
     migration = sub.add_parser("migration", help="Migration evidence workflows")
     migration_sub = migration.add_subparsers(dest="migration_command", required=True)

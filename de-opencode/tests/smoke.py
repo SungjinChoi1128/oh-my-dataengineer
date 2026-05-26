@@ -63,6 +63,11 @@ def main() -> int:
 
     dbsql = assert_json(run_tool("de_dbsql.py", "classify", "--sql", "SELECT 1"))
     assert dbsql["category"] == "readonly"
+    dbsql_execute_plan = assert_json(run_tool("de_dbsql.py", "execute", "--sql", "SELECT 1", "--dry-run-only", "--format", "json"))
+    assert dbsql_execute_plan["status"] == "ok"
+    assert dbsql_execute_plan["will_execute"] is False
+    umbrella_sql_plan = assert_json(run_tool("de.py", "databricks", "sql", "execute", "--sql", "SELECT 1", "--dry-run-only", "--result-format", "json"))
+    assert umbrella_sql_plan["status"] == "ok"
 
     uc_dry = assert_json(run_tool("de_dbsql.py", "dry-run", "--sql", "SELECT * FROM sales.orders"))
     assert uc_dry["status"] == "ok"
@@ -92,6 +97,8 @@ def main() -> int:
 
     mssql = assert_json(run_tool("de_mssql.py", "classify", "--sql", "DROP TABLE dbo.Customers"))
     assert mssql["category"] == "dangerous"
+    blocked_mssql = assert_json(run_tool("de_mssql.py", "query", "--sql", "DROP TABLE dbo.Customers", expect=1))
+    assert blocked_mssql["status"] == "blocked"
 
     ado = assert_json(run_tool("de_ado.py", "classify", "--operation", "run-trigger"))
     assert ado["requires_approval"] is True
