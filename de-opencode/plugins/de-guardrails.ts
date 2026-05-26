@@ -426,6 +426,44 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           return runPython($, "de_quality.py", ["evidence-template", "--claim", args.claim, "--environment", args.environment || "dev"])
         },
       }),
+      de_quality_verdict: tool({
+        description: "Aggregate repo context, todo, and evidence files into a ready/needs-evidence/blocked completion verdict.",
+        args: {
+          claim: tool.schema.string().describe("Claim being verified."),
+          environment: tool.schema.string().optional().describe("Environment name."),
+          repoRoot: tool.schema.string().optional().describe("Repo root that contains .de-opencode context."),
+          evidenceDir: tool.schema.string().optional().describe("Directory containing JSON evidence files."),
+          testsEvidence: tool.schema.boolean().optional().describe("Set when test/compile evidence exists outside files."),
+          sqlEvidence: tool.schema.boolean().optional().describe("Set when SQL classify/dry-run evidence exists outside files."),
+          rowSchemaEvidence: tool.schema.boolean().optional().describe("Set when row-count/schema evidence exists outside files."),
+          pipelineEvidence: tool.schema.boolean().optional().describe("Set when pipeline/bundle preflight evidence exists outside files."),
+          securityEvidence: tool.schema.boolean().optional().describe("Set when auth/security evidence exists outside files."),
+          dataChanged: tool.schema.boolean().optional().describe("Require row-count/schema evidence."),
+          pipelineChanged: tool.schema.boolean().optional().describe("Require pipeline or bundle preflight evidence."),
+          securitySensitive: tool.schema.boolean().optional().describe("Require security/auth evidence."),
+        },
+        async execute(args) {
+          return runPython($, "de_quality.py", [
+            "verdict",
+            "--claim",
+            args.claim,
+            "--environment",
+            args.environment || "dev",
+            "--format",
+            "json",
+            ...(args.repoRoot ? ["--repo-root", args.repoRoot] : []),
+            ...(args.evidenceDir ? ["--evidence-dir", args.evidenceDir] : []),
+            ...(args.testsEvidence ? ["--tests-evidence"] : []),
+            ...(args.sqlEvidence ? ["--sql-evidence"] : []),
+            ...(args.rowSchemaEvidence ? ["--row-schema-evidence"] : []),
+            ...(args.pipelineEvidence ? ["--pipeline-evidence"] : []),
+            ...(args.securityEvidence ? ["--security-evidence"] : []),
+            ...(args.dataChanged ? ["--data-changed"] : []),
+            ...(args.pipelineChanged ? ["--pipeline-changed"] : []),
+            ...(args.securitySensitive ? ["--security-sensitive"] : []),
+          ])
+        },
+      }),
       de_quality_reconcile: tool({
         description: "Compare source and target row counts before migration or release signoff.",
         args: {

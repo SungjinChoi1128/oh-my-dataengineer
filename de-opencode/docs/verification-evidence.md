@@ -1,6 +1,6 @@
 # Verification Evidence
 
-Date: 2026-05-25
+Date: 2026-05-26
 
 Environment used for local verification:
 
@@ -36,6 +36,8 @@ python3 de-opencode/tools/de.py mssql assess --metadata-file de-opencode/samples
 python3 de-opencode/tools/de.py migration plan --objects-file de-opencode/samples/migration/object-map.json --source mssql --target databricks
 python3 de-opencode/tools/de.py security checklist --scope client-review
 python3 de-opencode/tools/de.py quality readiness --claim "migration release is ready" --environment prod
+python3 de-opencode/tools/de_quality.py verdict --claim "repo change is done" --repo-root /private/tmp/de-opencode-repo-context-smoke --format json
+python3 de-opencode/tools/de.py done --claim "repo change is done" --repo-root /private/tmp/de-opencode-repo-context-smoke --evidence-dir /private/tmp/de-opencode-done-evidence --format json
 python3 de-opencode/tools/de_dbsql.py dry-run --sql "MERGE INTO sales.orders USING staging.orders ON sales.orders.id = staging.orders.id WHEN MATCHED THEN UPDATE SET amount = staging.orders.amount" --environment prod
 python3 de-opencode/tools/de.py demo pipeline-doctor --out /private/tmp/de-evidence-ux --format markdown
 python3 de-opencode/tools/de.py pipeline doctor --pipeline-yaml de-opencode/samples/ado-pipeline/azure-pipelines.bad.yml --log-file de-opencode/samples/ado-pipeline/build-failure.log --write-evidence --out /private/tmp/de-evidence-direct
@@ -57,6 +59,7 @@ env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de-databricks 
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de databricks runtime-advisor --current-runtime 15.4 --target-runtime 16.4 --environment dev
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de demo pipeline-doctor --out /private/tmp/de-evidence-installed-final --format markdown
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de quality reconcile --source-count 10 --target-count 10
+env PATH=/private/tmp/de-opencode-home-done/.local/bin:$PATH de done --claim "install wrapper done" --environment dev --format json
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de release verify --root /private/tmp/de-opencode-install-workbench
 python3 de-opencode/tools/de_pipeline.py preflight --pipeline-yaml de-opencode/samples/ado-pipeline/azure-pipelines.good.yml
 python3 de-opencode/tools/de_pipeline.py diagnose --pipeline-yaml de-opencode/samples/ado-pipeline/azure-pipelines.bad.yml --log-file de-opencode/samples/ado-pipeline/build-failure.log --ledger /private/tmp/de-opencode-pipeline-ledger.jsonl
@@ -79,6 +82,7 @@ Results:
 - `de mssql assess` identified dynamic SQL, SQL Agent, and linked-server migration risks from inventory metadata.
 - `de migration plan` produced required migration evidence and unresolved mapping counts.
 - `de security checklist` and `de quality readiness` produced client/release checklists.
+- `de done` / `de quality verdict` returned `needs-evidence` when repo evidence was missing and `ready` when test, SQL, and pipeline evidence files were attached.
 - `de demo pipeline-doctor` returned success for the bundled unsafe demo while still showing `BLOCKED` in the report.
 - `de pipeline doctor` returned nonzero for the unsafe sample, wrote JSON/Markdown evidence, and included fix steps plus ADO next commands.
 - Databricks Bundle Doctor passed the safe sample and blocked the unsafe sample with secret, production-mode, hardcoded-host, and runtime-evidence findings.
@@ -90,7 +94,8 @@ Results:
 - Generated WSL wrappers ran successfully from a temporary PATH.
 - Installed package verified against its release manifest.
 - Installed `de quality reconcile` produced a passing row-count evidence summary.
-- OpenCode plugin exposes safe data-engineering tools for config, Workbench catalog/triage/refinement/bulk preview/MSSQL assessment/migration plan/security checklist/quality readiness, Databricks Bundle Doctor, Runtime Advisor, Databricks SQL classification/dry-run, MSSQL policy/classification, ADO preflight, Pipeline Doctor, evidence templates, and row-count reconciliation.
+- Installed `de done` wrapper produced a JSON completion verdict.
+- OpenCode plugin exposes safe data-engineering tools for config, Workbench catalog/triage/refinement/bulk preview/MSSQL assessment/migration plan/security checklist/quality readiness, Databricks Bundle Doctor, Runtime Advisor, Databricks SQL classification/dry-run, MSSQL policy/classification, ADO preflight, Pipeline Doctor, evidence templates, row-count reconciliation, and completion verdicts.
 - Shell syntax check passed for `install-wsl.sh`.
 - Secret-pattern scan returned no matches.
 

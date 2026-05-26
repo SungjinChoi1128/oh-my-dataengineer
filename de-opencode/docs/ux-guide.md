@@ -3,6 +3,7 @@
 The product front door is `de`.
 
 Use focused low-level commands such as `de-pipeline`, `de-quality`, and `de-config` for automation. Use `de` for humans.
+The final completion UX is `ready/needs-evidence/blocked`, exposed by `de done`.
 
 ## Core Commands
 
@@ -29,6 +30,7 @@ de pipeline doctor --pipeline-yaml azure-pipelines.yml --log-file build.log --wr
 de pipeline preflight --pipeline-yaml azure-pipelines.yml
 de pipeline evidence --claim "Bundle deploy is safe" --environment dev --out out/de-evidence
 de quality reconcile --source-count 100 --target-count 100
+de done --claim "release is ready" --environment prod --evidence-dir out/de-evidence
 de release verify
 de demo pipeline-doctor
 ```
@@ -48,5 +50,6 @@ de --format markdown demo pipeline-doctor
 - Explain the reason in plain language.
 - Show the safest next action.
 - Write evidence artifacts when the action matters.
+- Use `de done` as the final plain-language verdict: ready, needs-evidence, or blocked.
 - Keep raw JSON available for automation.
 - Never print secrets.

@@ -39,6 +39,7 @@ de security checklist --scope client-review
 de pipeline doctor --pipeline-yaml azure-pipelines.yml --log-file build.log --write-evidence
 de quality readiness --claim "release is ready" --environment prod
 de quality reconcile --source-count 100 --target-count 100
+de done --claim "release is ready" --environment prod --evidence-dir out/de-evidence
 de release verify
 ```
 
@@ -51,6 +52,8 @@ de release verify
 `de databricks bundle-doctor` and `de databricks runtime-advisor` add Databricks-specific readiness checks for Asset Bundles, ADO deploys, runtime upgrades, Unity Catalog naming discipline, and modern AI/serving/telemetry workloads.
 
 `de databricks sql execute`, `de ado query`, and `de mssql query` are guarded live paths. Start with dry-run/classify/policy checks, then use your installed Databricks CLI/profile, Azure CLI, or `sqlcmd` instead of replacing them.
+
+`de done` is the final human UX gate. It reads repo context, repo next actions, optional JSON evidence files, and common data-engineering gates, then returns `ready`, `needs-evidence`, or `blocked` without executing live platform actions.
 
 ## Output Modes
 

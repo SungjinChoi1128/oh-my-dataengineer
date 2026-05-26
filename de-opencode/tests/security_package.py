@@ -40,6 +40,7 @@ def main() -> int:
     assert permissions["de_workbench_ado_refine"] == "allow"
     assert permissions["de_workbench_ado_bulk_preview"] == "allow"
     assert permissions["de_workbench_mssql_assess"] == "allow"
+    assert permissions["de_quality_verdict"] == "allow"
     assert permissions["de_quality_reconcile"] == "allow"
     assert permissions["bash"]["databricks bundle deploy*"] == "ask"
     assert permissions["bash"]["sqlcmd *"] == "ask"
@@ -54,6 +55,8 @@ def main() -> int:
     assert permissions["bash"]["de mssql query *"] == "allow"
     assert permissions["bash"]["de ado bulk preview *"] == "allow"
     assert permissions["bash"]["de security checklist*"] == "allow"
+    assert permissions["bash"]["de done *"] == "allow"
+    assert permissions["bash"]["de quality verdict *"] == "allow"
     assert permissions["bash"]["de auth*"] == "allow"
     assert permissions["bash"]["de repo init*"] == "allow"
     assert permissions["bash"]["de repo contract*"] == "allow"
@@ -67,6 +70,7 @@ def main() -> int:
     assert permissions["bash"]["de-repo interview*"] == "allow"
     assert permissions["bash"]["de-repo install-contract*"] == "ask"
     assert permissions["bash"]["de workbench capabilities*"] == "allow"
+    assert permissions["bash"]["de-quality verdict *"] == "allow"
 
     agent = config["agent"]["data-engineer"]
     assert agent["steps"] <= 24
@@ -104,6 +108,7 @@ def main() -> int:
         "de_pipeline_diagnose",
         "de_pipeline_evidence",
         "de_quality_evidence_template",
+        "de_quality_verdict",
         "de_quality_reconcile",
     ]:
         assert expected in plugin
@@ -138,6 +143,7 @@ def main() -> int:
     assert (ROOT / "docs" / "checkpoint-audit.md").exists()
     assert (ROOT / "docs" / "ux-guide.md").exists()
     assert "de auth" in read("README.md")
+    assert "de done" in read("README.md")
     assert "de workbench capabilities" in read("README.md")
     assert "docs/user-manual.md" in read("README.md")
     assert "docs/repo-onboarding.md" in read("README.md")
@@ -154,6 +160,8 @@ def main() -> int:
     assert "Azure DevOps Workflows" in read("docs/user-manual.md")
     assert "Databricks SQL Live Execution" in read("docs/user-manual.md")
     assert "MSSQL Live Read Query" in read("docs/user-manual.md")
+    assert "ready/needs-evidence/blocked" in read("docs/ux-guide.md")
+    assert "de quality verdict" in read("docs/user-manual.md")
     assert "`.env` files are not supported" in read("README.md")
     assert "DE_ALLOW_DOTENV=true" not in read("docs/security-model.md")
     assert "local-dev fallback" not in read("skills/de-security-review/SKILL.md")
@@ -169,6 +177,7 @@ def main() -> int:
     assert "repo contract --root" in read("smoke.ps1")
     assert "repo todo --root" in read("smoke.ps1")
     assert "repo interview --root" in read("smoke.ps1")
+    assert 'done --claim "install smoke"' in read("smoke.ps1")
     assert "write_wrapper de de.py" in read("install-wsl.sh")
     assert "write_wrapper de-databricks de_databricks.py" in read("install-wsl.sh")
     assert "write_wrapper de-workbench de_workbench.py" in read("install-wsl.sh")

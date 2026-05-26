@@ -94,6 +94,31 @@ def main() -> int:
     assert any(action["id"] == "confirm-auth-posture" for action in repo_todo["actions"])
     assert any(action["id"] == "databricks-bundle-check" for action in repo_todo["actions"])
     assert any(action["id"] == "pipeline-preflight" for action in repo_todo["actions"])
+    done_missing = assert_json(run_tool("de_quality.py", "verdict", "--claim", "repo change is done", "--repo-root", str(repo_fixture), "--format", "json"))
+    assert done_missing["verdict"] == "needs-evidence"
+    assert "test or compile evidence" in done_missing["missing"]
+    assert "pipeline or Databricks bundle preflight evidence" in done_missing["missing"]
+    done_evidence = Path(tempfile.gettempdir()) / "de-opencode-done-evidence"
+    if done_evidence.exists():
+        shutil.rmtree(done_evidence)
+    done_evidence.mkdir()
+    (done_evidence / "tests.json").write_text(json.dumps({"status": "ok", "check": "unit tests"}), encoding="utf-8")
+    (done_evidence / "sql.json").write_text(json.dumps({"status": "ok", "check": "sql dry-run"}), encoding="utf-8")
+    (done_evidence / "pipeline.json").write_text(json.dumps({"status": "ok", "check": "pipeline preflight"}), encoding="utf-8")
+    done_ready = assert_json(run_tool(
+        "de.py",
+        "done",
+        "--claim",
+        "repo change is done",
+        "--repo-root",
+        str(repo_fixture),
+        "--evidence-dir",
+        str(done_evidence),
+        "--format",
+        "json",
+    ))
+    assert done_ready["verdict"] == "ready"
+    assert len(done_ready["evidence_found"]) == 3
     repo_commands = assert_json(run_tool("de_repo.py", "commands", "--root", str(repo_fixture)))
     assert 'de databricks sql execute --sql "SELECT 1" --dry-run-only' in repo_commands["databricks"]
     assert "de-mssql policy-check" in repo_commands["mssql"]

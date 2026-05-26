@@ -288,6 +288,44 @@ def cmd_quality_reconcile(args: argparse.Namespace) -> int:
     return code
 
 
+def cmd_quality_verdict(args: argparse.Namespace) -> int:
+    tool_args = [
+        "verdict",
+        "--claim",
+        args.claim,
+        "--environment",
+        args.environment,
+        "--repo-root",
+        args.repo_root,
+        "--format",
+        args.format,
+    ]
+    for item in getattr(args, "evidence_file", None) or []:
+        tool_args += ["--evidence-file", item]
+    for flag, value in [
+        ("--evidence-dir", args.evidence_dir),
+        ("--out", args.out),
+    ]:
+        if value:
+            tool_args += [flag, value]
+    for flag, enabled in [
+        ("--tests-evidence", args.tests_evidence),
+        ("--sql-evidence", args.sql_evidence),
+        ("--row-schema-evidence", args.row_schema_evidence),
+        ("--pipeline-evidence", args.pipeline_evidence),
+        ("--security-evidence", args.security_evidence),
+        ("--rollback-note", args.rollback_note),
+        ("--approval-note", args.approval_note),
+        ("--data-changed", args.data_changed),
+        ("--pipeline-changed", args.pipeline_changed),
+        ("--security-sensitive", args.security_sensitive),
+        ("--strict", args.strict),
+    ]:
+        if enabled:
+            tool_args.append(flag)
+    return subprocess.run([sys.executable, str(TOOLS / "de_quality.py"), *tool_args]).returncode
+
+
 def render_databricks_bundle_text(data: Dict) -> str:
     status = data.get("status", "unknown").upper()
     lines = [f"Databricks Bundle Doctor: {status}"]
@@ -619,12 +657,35 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text", help="Output format")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    def add_done_args(target: argparse.ArgumentParser) -> None:
+        target.add_argument("--claim", required=True)
+        target.add_argument("--environment", default="dev")
+        target.add_argument("--repo-root", default=".")
+        target.add_argument("--evidence-file", action="append")
+        target.add_argument("--evidence-dir")
+        target.add_argument("--tests-evidence", action="store_true")
+        target.add_argument("--sql-evidence", action="store_true")
+        target.add_argument("--row-schema-evidence", action="store_true")
+        target.add_argument("--pipeline-evidence", action="store_true")
+        target.add_argument("--security-evidence", action="store_true")
+        target.add_argument("--rollback-note", action="store_true")
+        target.add_argument("--approval-note", action="store_true")
+        target.add_argument("--data-changed", action="store_true")
+        target.add_argument("--pipeline-changed", action="store_true")
+        target.add_argument("--security-sensitive", action="store_true")
+        target.add_argument("--out")
+        target.add_argument("--strict", action="store_true")
+        add_format_arg(target)
+
     doctor = sub.add_parser("doctor", help="Run Windows/team onboarding checks")
     add_format_arg(doctor)
     doctor.set_defaults(func=cmd_doctor)
     auth = sub.add_parser("auth", help="Show enterprise auth posture")
     add_format_arg(auth)
     auth.set_defaults(func=cmd_auth)
+    done = sub.add_parser("done", help="Give a ready/needs-evidence/blocked data-engineering completion verdict")
+    add_done_args(done)
+    done.set_defaults(func=cmd_quality_verdict)
 
     repo = sub.add_parser("repo", help="Repo-specific data-engineering onboarding")
     repo_sub = repo.add_subparsers(dest="repo_command", required=True)
@@ -782,6 +843,9 @@ def build_parser() -> argparse.ArgumentParser:
     q_ready.add_argument("--environment", default="dev")
     add_format_arg(q_ready)
     q_ready.set_defaults(func=lambda args: setattr(args, "workbench_command", "quality-readiness") or cmd_workbench_proxy(args))
+    q_verdict = quality_sub.add_parser("verdict", help="Aggregate repo and evidence files into a done verdict")
+    add_done_args(q_verdict)
+    q_verdict.set_defaults(func=cmd_quality_verdict)
 
     mssql = sub.add_parser("mssql", help="MSSQL assessment workflows")
     mssql_sub = mssql.add_subparsers(dest="mssql_command", required=True)

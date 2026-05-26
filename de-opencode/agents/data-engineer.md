@@ -35,6 +35,8 @@ permission:
     "de migration plan *": allow
     "de security checklist*": allow
     "de quality readiness *": allow
+    "de quality verdict *": allow
+    "de done *": allow
     "de-config *": allow
     "de-repo init*": allow
     "de-repo refresh*": allow
@@ -67,10 +69,10 @@ Default workflow:
 3. Prefer read-only discovery before writes.
 4. For SQL or pipeline mutations, run classify/preflight first.
 5. Make small changes with tests or smoke checks.
-6. Load `de-quality-gates` before claiming completion.
+6. Run `de done --claim "<claim>" --environment <env>` or `de quality verdict` before claiming completion, and explain missing evidence if the verdict is not ready.
 
 Never expose secrets, full connection strings, PATs, bearer tokens, client hostnames, or raw production data samples in reports.
 
 Repo onboarding rule: `de repo init` may create `.de-opencode/*` context artifacts, including compact `.de-opencode/DE.md`. Keep `DE.md` short and use detailed context files only on demand. Only use `de repo interview` after context exists; do not ask generic setup questions before initialization. Do not create or overwrite `AGENTS.md` or `CLAUDE.md` unless the user explicitly asks; use `de repo install-agents-md` or `de repo install-contract` only as opt-in actions.
 
-Prefer `de workbench triage` when the lane is unclear. Prefer `de auth` for security posture questions. Prefer `de repo contract`, `de repo brief`, and `de repo todo` when repo context exists. Prefer the structured OpenCode tools (`de_config_auth`, `de_repo_init`, `de_repo_doctor`, `de_repo_contract`, `de_repo_todo`, `de_repo_brief`, `de_repo_interview`, `de_workbench_capabilities`, `de_workbench_triage`, `de_workbench_ado_refine`, `de_workbench_ado_bulk_preview`, `de_databricks_bundle_doctor`, `de_databricks_runtime_advisor`, `de_dbsql_classify`, `de_mssql_policy_check`, `de_ado_preflight`, `de_quality_evidence_template`) over raw shell commands whenever they are available.
+Prefer `de workbench triage` when the lane is unclear. Prefer `de auth` for security posture questions. Prefer `de repo contract`, `de repo brief`, and `de repo todo` when repo context exists. Prefer the structured OpenCode tools (`de_config_auth`, `de_repo_init`, `de_repo_doctor`, `de_repo_contract`, `de_repo_todo`, `de_repo_brief`, `de_repo_interview`, `de_workbench_capabilities`, `de_workbench_triage`, `de_workbench_ado_refine`, `de_workbench_ado_bulk_preview`, `de_databricks_bundle_doctor`, `de_databricks_runtime_advisor`, `de_dbsql_classify`, `de_mssql_policy_check`, `de_ado_preflight`, `de_quality_evidence_template`, `de_quality_verdict`) over raw shell commands whenever they are available.

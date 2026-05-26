@@ -12,7 +12,7 @@ Use `de-opencode` for:
 - Databricks Asset Bundle preflight, runtime upgrade evidence, Databricks SQL classification, and Unity Catalog naming checks.
 - MSSQL SQL classification, connection/security posture checks, and legacy inventory risk review.
 - MSSQL/SSIS to Databricks migration planning and evidence packs.
-- QA gates: row-count reconciliation, schema/evidence templates, release readiness, and rollback notes.
+- QA gates: row-count reconciliation, schema/evidence templates, release readiness, done verdicts, and rollback notes.
 - Client security answers: secret handling, auth posture, OpenCode permissions, and production-change controls.
 
 Do not use it as a silent production executor. It is designed to inspect, classify, preview, run guarded live reads, and produce evidence first. Actual writes, deploys, reruns, mutating SQL, and bulk updates remain explicit and approval-gated.
@@ -339,9 +339,24 @@ Before claiming work is complete, define the claim and run the smallest checks t
 de quality readiness --claim "Databricks bundle release is ready" --environment prod
 de quality reconcile --source-count 100000 --target-count 100000
 de pipeline evidence --claim "Bundle deploy is safe" --environment dev --out out/de-evidence
+de done --claim "Databricks bundle release is ready" --environment prod --evidence-dir out/de-evidence
 ```
 
 For production releases, evidence should mention tests, SQL classification, row/schema evidence, pipeline or bundle preflight, security review, rollback notes, and approval status.
+
+`de done` is the final verdict command. It does not run live Databricks, ADO, or MSSQL actions. It reads `.de-opencode` repo context, repo next actions, optional JSON evidence files, and evidence flags, then returns:
+
+- `ready`: enough evidence is present for the detected repo shape and environment.
+- `needs-evidence`: nothing failed, but the claim is missing proof such as SQL dry-run, tests, row/schema evidence, pipeline preflight, security/auth, rollback, or approval.
+- `blocked`: an attached evidence file failed, is blocked, or cannot be read.
+
+Useful examples:
+
+```bash
+de done --claim "migration wave 1 is ready" --environment prod --evidence-dir out/de-evidence
+de quality verdict --claim "sprint update is safe" --environment dev --tests-evidence --security-evidence
+de done --claim "SQL update is safe" --environment prod --data-changed --sql-evidence --row-schema-evidence --security-evidence --rollback-note --approval-note
+```
 
 ## OpenCode Usage
 
@@ -362,6 +377,7 @@ Prefer the custom tools or `de` wrappers over raw shell commands whenever possib
 de ado refine --items-file sprint-items.json
 de ado bulk preview --file proposed-updates.csv
 de quality readiness --claim "sprint update is safe" --environment dev
+de done --claim "sprint update is safe" --environment dev --tests-evidence --security-evidence
 ```
 
 ### A Databricks Deployment Failed In ADO
@@ -389,6 +405,7 @@ Answer in plain language: the package does not store secrets, does not support `
 de mssql assess --metadata-file inventory.json
 de migration plan --objects-file object-map.json --source mssql --target databricks
 de quality readiness --claim "migration wave 1 is ready" --environment prod
+de done --claim "migration wave 1 is ready" --environment prod --evidence-dir out/de-evidence
 ```
 
 ## Troubleshooting

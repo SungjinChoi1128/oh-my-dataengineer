@@ -25,8 +25,9 @@ Define the claim first. Then run the smallest checks that prove it.
 
 ## Preferred Tool
 
-Use `de quality readiness --claim "<claim>" --environment <env>` as the human front door.
-Use `de_quality_evidence_template` or `de_workbench_quality_readiness` when OpenCode custom tools are available. Otherwise run `de-quality evidence-template --claim "<claim>"`.
+Use `de quality readiness --claim "<claim>" --environment <env>` to plan evidence.
+Use `de done --claim "<claim>" --environment <env>` or `de quality verdict` before claiming completion.
+Use `de_quality_evidence_template`, `de_workbench_quality_readiness`, or `de_quality_verdict` when OpenCode custom tools are available. Otherwise run `de-quality evidence-template --claim "<claim>"`.
 
 ## Evidence Report
 
