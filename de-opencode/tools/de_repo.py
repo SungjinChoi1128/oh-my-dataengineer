@@ -265,17 +265,136 @@ def safety_policy(signals: dict) -> dict:
     return {"status": "active", "rules": rules}
 
 
+def build_interview(context: dict) -> dict:
+    signals = context.get("signals", {})
+    questions: list[dict[str, str]] = []
+
+    def add(question_id: str, priority: str, question: str, reason: str) -> None:
+        questions.append({
+            "id": question_id,
+            "priority": priority,
+            "question": question,
+            "reason": reason,
+        })
+
+    if "unknown" in context.get("repo_types", []):
+        add(
+            "repo-purpose",
+            "high",
+            "What is this repo mainly responsible for, and what should the agent never assume about it?",
+            "The scanner could not classify the repo from files alone.",
+        )
+
+    add(
+        "safe-default-environment",
+        "high",
+        "Which environment is safe for default live checks: local, dev, test, uat, or none without approval?",
+        "Live Databricks, MSSQL, and ADO actions need an explicit safe default.",
+    )
+    add(
+        "owner-and-escalation",
+        "medium",
+        "Who owns this repo and who should approve deploys, SQL mutations, or pipeline reruns?",
+        "The package can block risky actions, but approval ownership is client-specific.",
+    )
+
+    if signals.get("azure_pipelines"):
+        add(
+            "ado-project-and-sprint",
+            "high",
+            "Which Azure DevOps organization/project/team/sprint should backlog and pipeline commands use by default?",
+            "Azure Pipelines were detected, but ADO workspace defaults are not safe to infer.",
+        )
+        add(
+            "pipeline-rerun-boundary",
+            "high",
+            "Which pipeline reruns are safe after Pipeline Doctor, and which require human approval?",
+            "Pipeline reruns can affect deployments or shared environments.",
+        )
+
+    if signals.get("databricks_bundle"):
+        add(
+            "databricks-targets",
+            "high",
+            "Which Databricks bundle target/profile is safe for validate, deploy, and run commands?",
+            "A Databricks bundle was detected, but target names do not reveal client approval boundaries.",
+        )
+        add(
+            "unity-catalog-boundary",
+            "medium",
+            "Which catalogs/schemas/workspaces are dev-only, shared, or production governed?",
+            "Unity Catalog and workspace boundaries determine safe SQL and deployment behavior.",
+        )
+
+    if signals.get("sql") or signals.get("mssql_or_tsql"):
+        add(
+            "sql-execution-boundary",
+            "high",
+            "Which MSSQL or SQL endpoints are read-only, and where are mutations forbidden without approval?",
+            "SQL files were detected, so live query execution needs client-specific boundaries.",
+        )
+        add(
+            "data-quality-evidence",
+            "medium",
+            "What row-count, schema, reconciliation, or sample evidence is expected before calling data work done?",
+            "Quality evidence expectations vary by client and dataset.",
+        )
+
+    if signals.get("dbt"):
+        add(
+            "dbt-targets",
+            "medium",
+            "Which dbt targets, selectors, and schemas should the agent use for safe validation?",
+            "dbt project settings do not prove which target is safe.",
+        )
+
+    if not signals.get("tests"):
+        add(
+            "verification-gap",
+            "medium",
+            "There are no obvious tests. What command or manual evidence proves a change is safe here?",
+            "The scanner did not detect a test surface.",
+        )
+
+    if context.get("risk_zones"):
+        add(
+            "risk-zone-review",
+            "medium",
+            "Which detected risk-zone files are production-affecting, and which are safe development artifacts?",
+            "File names suggest possible deploy, SQL mutation, notebook, or pipeline risk.",
+        )
+
+    add(
+        "definition-of-done",
+        "medium",
+        "For this repo, what should be included in the final evidence pack before a PR or client handoff?",
+        "Consulting delivery needs repeatable completion evidence.",
+    )
+
+    return {
+        "status": "ready",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source": "repo-context",
+        "instructions": "Ask these only after repo context has been initialized. Prefer the highest-priority unresolved questions.",
+        "questions": questions,
+    }
+
+
 def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, str]:
     target = root / CONTEXT_DIR
     target.mkdir(parents=True, exist_ok=True)
     paths = {
         "context": target / "repo-context.json",
         "brief": target / "repo-brief.md",
+        "interview": target / "repo-interview.md",
+        "interview_json": target / "repo-interview.json",
         "commands": target / "commands.json",
         "policy": target / "safety-policy.json",
     }
     paths["context"].write_text(json.dumps(context, indent=2) + "\n", encoding="utf-8")
     paths["brief"].write_text(render_brief(context) + "\n", encoding="utf-8")
+    paths["interview"].write_text(render_interview(context) + "\n", encoding="utf-8")
+    paths["interview_json"].write_text(json.dumps(context["interview"], indent=2) + "\n", encoding="utf-8")
     paths["commands"].write_text(json.dumps(context["commands"], indent=2) + "\n", encoding="utf-8")
     paths["policy"].write_text(json.dumps(context["safety_policy"], indent=2) + "\n", encoding="utf-8")
     return {key: rel(path, root) for key, path in paths.items()}
@@ -323,6 +442,35 @@ def render_brief(context: dict) -> str:
         lines.append("")
     lines += ["## Safety Policy", ""]
     lines.extend(f"- {rule}" for rule in context["safety_policy"]["rules"])
+    if context.get("interview", {}).get("questions"):
+        lines += ["", "", "## Suggested Interview", ""]
+        lines.append("- Run `de repo interview` after initialization to ask targeted repo questions.")
+    return "\n".join(lines).rstrip()
+
+
+def render_interview(context: dict, max_questions: Optional[int] = None) -> str:
+    interview = context.get("interview") or build_interview(context)
+    questions = interview.get("questions", [])
+    if max_questions:
+        questions = questions[:max_questions]
+    lines = [
+        f"# Repo Interview: {context['repo_name']}",
+        "",
+        f"Generated: {interview.get('generated_at', context.get('generated_at', 'unknown'))}",
+        "",
+        "Use these questions only after `de repo init` has generated repo context. Ask the highest-priority unanswered questions first.",
+        "",
+    ]
+    if not questions:
+        lines.append("No interview questions were generated.")
+        return "\n".join(lines)
+    for item in questions:
+        lines.append(f"## {item['id']} ({item['priority']})")
+        lines.append("")
+        lines.append(item["question"])
+        lines.append("")
+        lines.append(f"Why: {item['reason']}")
+        lines.append("")
     return "\n".join(lines).rstrip()
 
 
@@ -347,6 +495,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
     files = iter_repo_files(root, args.max_files)
     context = detect_repo(root, files)
+    context["interview"] = build_interview(context)
     artifacts = write_artifacts(root, context)
     result = {"status": "ok", "root": str(root), "artifacts": artifacts, "summary": summary(context)}
     print(json.dumps(result, indent=2))
@@ -360,7 +509,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     if context is None:
         issues.append("Repo context not initialized. Run `de repo init`.")
     else:
-        for name in ("repo-brief.md", "commands.json", "safety-policy.json"):
+        for name in ("repo-brief.md", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
             if not (root / CONTEXT_DIR / name).exists():
                 issues.append(f"Missing {CONTEXT_DIR}/{name}. Run `de repo refresh`.")
     agents_md = root / "AGENTS.md"
@@ -396,6 +545,32 @@ def cmd_json_artifact(args: argparse.Namespace, key: str) -> int:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init`."}, indent=2))
         return 1
     print(json.dumps(context[key], indent=2))
+    return 0
+
+
+def cmd_interview(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    context = load_context(root)
+    if context is None:
+        print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before interviewing the user."}, indent=2))
+        return 1
+    if "interview" not in context:
+        context["interview"] = build_interview(context)
+    max_questions = args.max_questions if args.max_questions and args.max_questions > 0 else None
+    questions = context["interview"].get("questions", [])
+    if max_questions:
+        questions = questions[:max_questions]
+    data = {
+        "status": "ok",
+        "root": str(root),
+        "question_count": len(questions),
+        "instructions": context["interview"].get("instructions", ""),
+        "questions": questions,
+    }
+    if args.format == "json":
+        print(json.dumps(data, indent=2))
+    else:
+        print(render_interview({**context, "interview": {**context["interview"], "questions": questions}}))
     return 0
 
 
@@ -444,7 +619,7 @@ def summary(context: dict) -> dict:
         "repo_types": context["repo_types"],
         "signals": {key: value for key, value in context["signals"].items() if value},
         "risk_count": len(context["risk_zones"]),
-        "next_commands": ["de repo brief", "de repo doctor", "de repo commands"],
+        "next_commands": ["de repo brief", "de repo interview", "de repo doctor", "de repo commands"],
     }
 
 
@@ -471,6 +646,11 @@ def build_parser() -> argparse.ArgumentParser:
     add_root(brief)
     brief.add_argument("--format", choices=["markdown", "json"], default="markdown")
     brief.set_defaults(func=cmd_brief)
+    interview = sub.add_parser("interview", help="Print initialized repo-specific user interview questions")
+    add_root(interview)
+    interview.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    interview.add_argument("--max-questions", type=int, default=0)
+    interview.set_defaults(func=cmd_interview)
     commands = sub.add_parser("commands", help="Print detected repo commands")
     add_root(commands)
     commands.set_defaults(func=lambda args: cmd_json_artifact(args, "commands"))

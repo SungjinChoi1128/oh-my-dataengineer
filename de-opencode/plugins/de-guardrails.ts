@@ -115,6 +115,22 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           return runPython($, "de_repo.py", ["brief", ...(args.root ? ["--root", args.root] : [])])
         },
       }),
+      de_repo_interview: tool({
+        description: "Generate targeted repo-specific interview questions after repo context is initialized.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          maxQuestions: tool.schema.number().optional().describe("Maximum questions to return."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", [
+            "interview",
+            "--format",
+            "json",
+            ...(args.root ? ["--root", args.root] : []),
+            ...(args.maxQuestions ? ["--max-questions", String(args.maxQuestions)] : []),
+          ])
+        },
+      }),
       de_workbench_catalog: tool({
         description: "List de-opencode skills and their human front-door workflows.",
         args: {},

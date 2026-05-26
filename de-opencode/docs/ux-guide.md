@@ -11,6 +11,7 @@ de doctor
 de auth
 de repo init
 de repo brief
+de repo interview
 de workbench catalog
 de workbench capabilities
 de workbench triage --request "refine sprint backlog for Databricks migration"

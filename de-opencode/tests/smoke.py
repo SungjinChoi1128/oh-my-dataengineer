@@ -72,14 +72,21 @@ def main() -> int:
     (repo_fixture / "azure-pipelines.yml").write_text("trigger: none\n", encoding="utf-8")
     (repo_fixture / "sql" / "load_orders.sql").write_text("SELECT 1;\n", encoding="utf-8")
     (repo_fixture / "tests" / "test_smoke.py").write_text("def test_smoke():\n    assert True\n", encoding="utf-8")
+    interview_before_init = assert_json(run_tool("de_repo.py", "interview", "--root", str(repo_fixture), "--format", "json", expect=1))
+    assert interview_before_init["status"] == "needs-init"
     repo_init = assert_json(run_tool("de_repo.py", "init", "--root", str(repo_fixture)))
     assert repo_init["status"] == "ok"
     assert "databricks-bundle" in repo_init["summary"]["repo_types"]
     assert (repo_fixture / ".de-opencode" / "repo-context.json").exists()
+    assert (repo_fixture / ".de-opencode" / "repo-interview.md").exists()
     repo_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
     assert repo_doctor["status"] == "ok"
     repo_brief = run_tool("de.py", "repo", "brief", "--root", str(repo_fixture))
     assert "Repo Brief" in repo_brief
+    repo_interview = assert_json(run_tool("de.py", "repo", "interview", "--root", str(repo_fixture), "--format", "json", "--max-questions", "8"))
+    assert repo_interview["status"] == "ok"
+    assert repo_interview["question_count"] >= 5
+    assert any(question["id"] == "databricks-targets" for question in repo_interview["questions"])
     agents = assert_json(run_tool("de_repo.py", "install-agents-md", "--root", str(repo_fixture)))
     assert agents["status"] == "ok"
     agents_blocked = assert_json(run_tool("de_repo.py", "install-agents-md", "--root", str(repo_fixture), expect=1))

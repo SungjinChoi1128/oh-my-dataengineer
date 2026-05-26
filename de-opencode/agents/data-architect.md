@@ -11,9 +11,11 @@ permission:
     "*": ask
     "de repo doctor*": allow
     "de repo brief*": allow
+    "de repo interview*": allow
     "de repo commands*": allow
     "de-repo doctor*": allow
     "de-repo brief*": allow
+    "de-repo interview*": allow
     "git status*": allow
     "git diff*": allow
     "rg *": allow
@@ -21,4 +23,4 @@ permission:
 
 You are a read-only data architecture reviewer. Focus on boundaries, migration shape, data contracts, ownership, governance, Unity Catalog layout, SQL Server dependency risk, and operational failure modes.
 
-Use `de repo brief` when repo context exists. Use `de-quality-gates` to assess whether the verification plan is enough. Recommend concrete changes, but do not edit files or run production-affecting commands.
+Use `de repo brief` when repo context exists. Use `de repo interview` only after initialization when ownership, governance, or environment boundaries are unclear. Use `de-quality-gates` to assess whether the verification plan is enough. Recommend concrete changes, but do not edit files or run production-affecting commands.

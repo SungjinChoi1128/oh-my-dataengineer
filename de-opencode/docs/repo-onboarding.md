@@ -16,9 +16,10 @@ The agent should run:
 de repo doctor
 de repo init
 de repo brief
+de repo interview
 ```
 
-If repo context already exists, it should use `de repo brief` and `de repo commands` instead of rescanning immediately.
+If repo context already exists, it should use `de repo brief`, `de repo interview`, and `de repo commands` instead of rescanning immediately.
 
 ## CLI UX
 
@@ -26,6 +27,7 @@ If repo context already exists, it should use `de repo brief` and `de repo comma
 de repo init
 de repo doctor
 de repo brief
+de repo interview
 de repo commands
 de repo policy
 de repo refresh
@@ -36,11 +38,25 @@ de repo refresh
 ```text
 .de-opencode/repo-context.json
 .de-opencode/repo-brief.md
+.de-opencode/repo-interview.md
+.de-opencode/repo-interview.json
 .de-opencode/commands.json
 .de-opencode/safety-policy.json
 ```
 
-These files are reviewable. They contain detected repo shape, important files, risk zones, recommended commands, and safety policy.
+These files are reviewable. They contain detected repo shape, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
+
+## Initialized-Only Interview
+
+`de repo interview` is intentionally not a generic setup wizard. It requires initialized context and fails with `needs-init` before `.de-opencode/repo-context.json` exists.
+
+The questions are generated from detected signals:
+
+- Azure Pipelines: ADO organization, project, team, sprint, and rerun boundaries.
+- Databricks bundles: safe target/profile, workspace, catalog, and deployment boundaries.
+- SQL/MSSQL: read-only endpoints, mutation approval, and reconciliation evidence.
+- Missing tests: the evidence command or manual proof expected for this repo.
+- Risk zones: which detected deploy, SQL, notebook, or production-looking files are truly sensitive.
 
 ## Opt-In AGENTS.md
 

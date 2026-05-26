@@ -573,10 +573,12 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         tool_args.append("--strict")
     if getattr(args, "force", False):
         tool_args.append("--force")
-    if args.repo_command == "brief" and args.format == "json":
+    if args.repo_command in {"brief", "interview"} and args.format == "json":
         tool_args += ["--format", "json"]
+    if args.repo_command == "interview" and getattr(args, "max_questions", None):
+        tool_args += ["--max-questions", str(args.max_questions)]
     code, data, stderr = run_tool("de_repo.py", tool_args, expect_failure=True)
-    if args.repo_command == "brief" and args.format != "json":
+    if args.repo_command in {"brief", "interview"} and args.format != "json":
         text = data.get("raw_stdout", "")
         if text:
             print(text, end="" if text.endswith("\n") else "\n")
@@ -586,6 +588,7 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         "refresh": "Repo Refresh",
         "doctor": "Repo Doctor",
         "commands": "Repo Commands",
+        "interview": "Repo Interview",
         "policy": "Repo Policy",
         "install-agents-md": "Repo AGENTS.md Install",
     }.get(args.repo_command, "Repo")
@@ -625,6 +628,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("refresh", "Refresh .de-opencode repo context artifacts"),
         ("doctor", "Check repo context health"),
         ("brief", "Print repo brief"),
+        ("interview", "Print initialized repo-specific user interview questions"),
         ("commands", "Print detected repo commands"),
         ("policy", "Print detected repo safety policy"),
         ("install-agents-md", "Opt-in AGENTS.md generation from repo context"),
@@ -635,6 +639,8 @@ def build_parser() -> argparse.ArgumentParser:
             item.add_argument("--max-files", type=int, default=2000)
         if name == "doctor":
             item.add_argument("--strict", action="store_true")
+        if name == "interview":
+            item.add_argument("--max-questions", type=int, default=0)
         if name == "install-agents-md":
             item.add_argument("--force", action="store_true")
         add_format_arg(item)

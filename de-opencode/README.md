@@ -41,7 +41,7 @@ de release verify
 
 `de workbench` is the unified entry point for the package skill catalog and task triage.
 
-`de repo init` is the repo onboarding flow. It scans the current repo without reading secret files, writes `.de-opencode/repo-context.json`, `.de-opencode/repo-brief.md`, `.de-opencode/commands.json`, and `.de-opencode/safety-policy.json`, then future agent sessions can use that context. `AGENTS.md` generation is opt-in via `de repo install-agents-md`.
+`de repo init` is the repo onboarding flow. It scans the current repo without reading secret files, writes `.de-opencode/repo-context.json`, `.de-opencode/repo-brief.md`, `.de-opencode/repo-interview.md`, `.de-opencode/commands.json`, and `.de-opencode/safety-policy.json`, then future agent sessions can use that context. `de repo interview` asks targeted follow-up questions only after initialization, based on what the scan found. `AGENTS.md` generation is opt-in via `de repo install-agents-md`.
 
 `de pipeline doctor` is the primary CI/CD workflow. It preflights Azure Pipeline YAML, diagnoses build logs, explains blockers in plain language, suggests fixes, and writes evidence artifacts.
 
