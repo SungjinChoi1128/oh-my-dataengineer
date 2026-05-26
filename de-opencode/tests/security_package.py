@@ -29,6 +29,9 @@ def main() -> int:
     assert permissions["de_databricks_bundle_doctor"] == "allow"
     assert permissions["de_databricks_runtime_advisor"] == "allow"
     assert permissions["de_config_auth"] == "allow"
+    assert permissions["de_repo_init"] == "allow"
+    assert permissions["de_repo_doctor"] == "allow"
+    assert permissions["de_repo_brief"] == "allow"
     assert permissions["de_workbench_catalog"] == "allow"
     assert permissions["de_workbench_capabilities"] == "allow"
     assert permissions["de_workbench_ado_refine"] == "allow"
@@ -49,6 +52,9 @@ def main() -> int:
     assert permissions["bash"]["de ado bulk preview *"] == "allow"
     assert permissions["bash"]["de security checklist*"] == "allow"
     assert permissions["bash"]["de auth*"] == "allow"
+    assert permissions["bash"]["de repo init*"] == "allow"
+    assert permissions["bash"]["de repo install-agents-md*"] == "ask"
+    assert permissions["bash"]["de-repo init*"] == "allow"
     assert permissions["bash"]["de workbench capabilities*"] == "allow"
 
     agent = config["agent"]["data-engineer"]
@@ -62,6 +68,9 @@ def main() -> int:
         "tool.execute.before",
         "de_config_doctor",
         "de_config_auth",
+        "de_repo_init",
+        "de_repo_doctor",
+        "de_repo_brief",
         "de_workbench_catalog",
         "de_workbench_capabilities",
         "de_workbench_triage",
@@ -105,16 +114,21 @@ def main() -> int:
     assert (ROOT / "samples" / "migration" / "object-map.json").exists()
     assert (ROOT / "README.md").exists()
     assert (ROOT / "tools" / "de.py").exists()
+    assert (ROOT / "tools" / "de_repo.py").exists()
     assert (ROOT / "tools" / "de_workbench.py").exists()
     assert (ROOT / "tools" / "de_databricks.py").exists()
     assert (ROOT / "docs" / "workbench.md").exists()
     assert (ROOT / "docs" / "databricks.md").exists()
     assert (ROOT / "docs" / "user-manual.md").exists()
+    assert (ROOT / "docs" / "repo-onboarding.md").exists()
     assert (ROOT / "docs" / "ux-guide.md").exists()
     assert "de auth" in read("README.md")
     assert "de workbench capabilities" in read("README.md")
     assert "docs/user-manual.md" in read("README.md")
+    assert "docs/repo-onboarding.md" in read("README.md")
     assert "What You Use It For" in read("docs/user-manual.md")
+    assert "Repo Onboarding" in read("docs/user-manual.md")
+    assert "Opt-In AGENTS.md" in read("docs/repo-onboarding.md")
     assert "Azure DevOps Workflows" in read("docs/user-manual.md")
     assert "Databricks SQL Live Execution" in read("docs/user-manual.md")
     assert "MSSQL Live Read Query" in read("docs/user-manual.md")
@@ -124,13 +138,16 @@ def main() -> int:
     assert '"de" = "de.py"' in read("install.ps1")
     assert '"de-databricks" = "de_databricks.py"' in read("install.ps1")
     assert '"de-workbench" = "de_workbench.py"' in read("install.ps1")
+    assert '"de-repo" = "de_repo.py"' in read("install.ps1")
     assert '"README.md"' in read("install.ps1")
     assert 'databricks sql execute --sql "SELECT 1" --dry-run-only' in read("smoke.ps1")
     assert "ado query --help" in read("smoke.ps1")
     assert "mssql query --help" in read("smoke.ps1")
+    assert "repo init --root" in read("smoke.ps1")
     assert "write_wrapper de de.py" in read("install-wsl.sh")
     assert "write_wrapper de-databricks de_databricks.py" in read("install-wsl.sh")
     assert "write_wrapper de-workbench de_workbench.py" in read("install-wsl.sh")
+    assert "write_wrapper de-repo de_repo.py" in read("install-wsl.sh")
     assert "$SOURCE_DIR/README.md" in read("install-wsl.sh")
 
     secret_scan = re.compile(

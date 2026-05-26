@@ -9,6 +9,8 @@ Use focused low-level commands such as `de-pipeline`, `de-quality`, and `de-conf
 ```bash
 de doctor
 de auth
+de repo init
+de repo brief
 de workbench catalog
 de workbench capabilities
 de workbench triage --request "refine sprint backlog for Databricks migration"

@@ -64,6 +64,8 @@ Run these before trusting the package in a client context:
 ```bash
 de doctor
 de auth
+de repo init
+de repo brief
 de workbench catalog
 de workbench capabilities
 de security checklist --scope client-review
@@ -73,6 +75,8 @@ What they tell you:
 
 - `de doctor`: local runtime, installed CLIs, redacted config state, and missing keys.
 - `de auth`: whether `.env` is unsupported, whether legacy secrets are present, and whether modern auth is configured.
+- `de repo init`: create repo-local context artifacts for the current project.
+- `de repo brief`: show the detected repo shape, important files, risk zones, and safe commands.
 - `de workbench catalog`: what skills and workflows the package exposes.
 - `de workbench capabilities`: what ADO, Databricks, MSSQL, and migration capability is covered.
 - `de security checklist`: client-facing security answer and review checklist.
@@ -116,6 +120,48 @@ Use lower-level wrappers only when you need automation:
 - `de-pipeline`
 - `de-quality`
 - `de-release`
+- `de-repo`
+
+## Repo Onboarding
+
+When you first use the package in a client repository, use conversation-first onboarding:
+
+```text
+Onboard this repo for data engineering.
+```
+
+The `data-engineer` agent should run:
+
+```bash
+de repo doctor
+de repo init
+de repo brief
+```
+
+The generated context lives in:
+
+```text
+.de-opencode/repo-context.json
+.de-opencode/repo-brief.md
+.de-opencode/commands.json
+.de-opencode/safety-policy.json
+```
+
+Use:
+
+```bash
+de repo commands
+de repo policy
+de repo refresh
+```
+
+`AGENTS.md` is opt-in because OpenCode auto-loads it:
+
+```bash
+de repo install-agents-md
+```
+
+The scanner skips `.env`, `.databrickscfg`, ODBC config, PEM/key files, obvious secret JSON/YAML files, and very large files.
 
 ## Azure DevOps Workflows
 

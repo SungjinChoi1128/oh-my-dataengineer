@@ -24,6 +24,10 @@ To avoid unnecessary role bloat. Most behavior lives in skills and safe tools. Q
 
 It uses layered controls: OpenCode permissions, ask-gated subagents, guardrail hooks, custom tools, and safe Python facades. The agent can inspect and classify freely, but raw production-affecting actions are routed through approval and QA gates.
 
+## Does repo onboarding create hidden memory?
+
+No. `de repo init` writes reviewable files under `.de-opencode/`. It skips secret files and does not create `AGENTS.md` unless the user explicitly runs `de repo install-agents-md`.
+
 ## What is the killer feature?
 
 Pipeline Doctor. It reads Azure Pipeline YAML and build logs, finds common Databricks/ADO failures, blocks unsafe deploy patterns, suggests fixes, and creates evidence for rerun or release decisions.

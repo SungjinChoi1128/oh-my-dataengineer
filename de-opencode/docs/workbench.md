@@ -5,10 +5,14 @@
 ## Skill Catalog
 
 ```bash
+de repo init
+de repo brief
 de workbench catalog
 de workbench capabilities
 de workbench triage --request "refine sprint backlog for Databricks migration"
 ```
+
+Use `de repo init` when first entering a client repo. It creates reviewable `.de-opencode/*` context artifacts so the agent can understand repo shape, important files, risk zones, and safe commands.
 
 ## ADO Sprint / Backlog
 

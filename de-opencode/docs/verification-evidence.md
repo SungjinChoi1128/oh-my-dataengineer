@@ -9,7 +9,7 @@ Environment used for local verification:
 - No live ADO, Databricks, or MSSQL credentials
 - No PowerShell Core available on this host, so `install.ps1` is provided for Windows 11 execution but not executed here
 
-Checks run for version `0.7.0`:
+Checks run for version `0.9.0`:
 
 ```text
 python3 de-opencode/tests/smoke.py
@@ -18,6 +18,9 @@ env PYTHONPYCACHEPREFIX=/private/tmp/de-opencode-pycache python3 -m compileall d
 python3 -m json.tool de-opencode/opencode.json
 python3 de-opencode/tools/de.py doctor --format json
 python3 de-opencode/tools/de.py auth
+python3 de-opencode/tools/de.py repo init --root /private/tmp/de-opencode-repo-context-smoke
+python3 de-opencode/tools/de.py repo doctor --root /private/tmp/de-opencode-repo-context-smoke
+python3 de-opencode/tools/de.py repo brief --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py workbench catalog
 python3 de-opencode/tools/de.py workbench capabilities --domain ado
 python3 de-opencode/tools/de.py workbench triage --request "refine sprint backlog for Databricks migration"
@@ -38,6 +41,8 @@ python3 de-opencode/tools/de_release.py verify --root de-opencode
 env HOME=/private/tmp/de-opencode-home-workbench sh de-opencode/install-wsl.sh /private/tmp/de-opencode-install-workbench
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de doctor
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de auth
+env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo init --root /private/tmp/de-opencode-repo-context-smoke
+env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de-repo doctor --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de-workbench catalog
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de workbench capabilities --domain ado
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de ado bulk preview --file /private/tmp/de-opencode-install-workbench/samples/ado-work-items/bulk-updates.csv
@@ -61,6 +66,7 @@ Results:
 - `opencode.json` parsed as valid JSON.
 - `de doctor` produced a human-readable readiness report and JSON output mode worked.
 - `de auth` reported `.env supported: False`, safe-default posture, and enterprise-ready status based on configured modern auth rather than mere absence of legacy secrets.
+- `de repo init`, `de repo doctor`, and `de repo brief` generated and read repo-local `.de-opencode` context artifacts without requiring secret files.
 - `de workbench catalog`, `de workbench capabilities`, and `de workbench triage` exposed all existing package skills and domain coverage through one front door.
 - `de ado refine` produced sprint/backlog refinement findings for missing acceptance criteria, child tasks, estimates, assignees, stale active work, and iteration gaps.
 - `de ado bulk preview` generated a non-mutating bulk update preview with approval required.
@@ -72,7 +78,7 @@ Results:
 - Databricks Bundle Doctor passed the safe sample and blocked the unsafe sample with secret, production-mode, hardcoded-host, and runtime-evidence findings.
 - Databricks Runtime Advisor produced required evidence for a production major-version runtime upgrade with Delta writes and ML/AI serving.
 - Databricks SQL dry-run blocked unsafe production MERGE without approval, row-count evidence, and Unity Catalog 3-part names.
-- Release manifest generation and verification passed for version `0.7.0`.
+- Release manifest generation and verification passed for version `0.9.0`.
 - Pipeline Doctor passed the safe sample, blocked the unsafe sample, diagnosed a missing Databricks CLI failure, and wrote ledger evidence.
 - WSL-style installer copied package files into `/private/tmp/de-opencode-install-workbench`.
 - Generated WSL wrappers ran successfully from a temporary PATH.

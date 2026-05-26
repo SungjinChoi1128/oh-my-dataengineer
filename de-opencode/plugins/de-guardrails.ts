@@ -83,6 +83,38 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           return runPython($, "de_config.py", ["auth"])
         },
       }),
+      de_repo_init: tool({
+        description: "Create safe repo-local de-opencode context artifacts for data-engineering onboarding.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          maxFiles: tool.schema.number().optional().describe("Maximum files to scan."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", [
+            "init",
+            ...(args.root ? ["--root", args.root] : []),
+            ...(args.maxFiles ? ["--max-files", String(args.maxFiles)] : []),
+          ])
+        },
+      }),
+      de_repo_doctor: tool({
+        description: "Check whether repo-local de-opencode context is initialized and healthy.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", ["doctor", ...(args.root ? ["--root", args.root] : [])])
+        },
+      }),
+      de_repo_brief: tool({
+        description: "Read the generated repo brief for data-engineering context.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", ["brief", ...(args.root ? ["--root", args.root] : [])])
+        },
+      }),
       de_workbench_catalog: tool({
         description: "List de-opencode skills and their human front-door workflows.",
         args: {},

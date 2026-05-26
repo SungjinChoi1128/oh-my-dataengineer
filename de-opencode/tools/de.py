@@ -529,6 +529,72 @@ def cmd_release_verify(args: argparse.Namespace) -> int:
     return code
 
 
+def render_repo_text(title: str, data: Dict) -> str:
+    status = str(data.get("status", "unknown")).upper()
+    lines = [f"{title}: {status}"]
+    if title == "Repo Commands" and "status" not in data:
+        lines = [title]
+        for group, commands in data.items():
+            lines += ["", f"{str(group).title()}:"]
+            lines += [f"- {command}" for command in commands]
+        return "\n".join(lines)
+    if title == "Repo Policy" and "rules" in data:
+        return "\n".join([title, "", *[f"- {rule}" for rule in data.get("rules", [])]])
+    if data.get("root"):
+        lines.append(f"- root: {data['root']}")
+    summary_data = data.get("summary", {})
+    if summary_data:
+        lines.append("- repo types: " + ", ".join(summary_data.get("repo_types", [])))
+        signals = summary_data.get("signals", {})
+        if signals:
+            lines.append("- signals: " + ", ".join(sorted(signals)))
+        lines.append(f"- risks: {summary_data.get('risk_count', 0)}")
+        lines += ["", "Next commands:"]
+        lines += [f"- {command}" for command in summary_data.get("next_commands", [])]
+    if data.get("artifacts"):
+        lines += ["", "Artifacts:"]
+        for key, path in data["artifacts"].items():
+            lines.append(f"- {key}: {path}")
+    if data.get("issues"):
+        lines += ["", "Issues:"]
+        lines += [f"- {issue}" for issue in data["issues"]]
+    if "agents_md_installed" in data:
+        lines.append(f"- AGENTS.md installed: {data['agents_md_installed']}")
+    return "\n".join(lines)
+
+
+def cmd_repo_proxy(args: argparse.Namespace) -> int:
+    tool_args = [args.repo_command]
+    if getattr(args, "root", None):
+        tool_args += ["--root", args.root]
+    if getattr(args, "max_files", None):
+        tool_args += ["--max-files", str(args.max_files)]
+    if getattr(args, "strict", False):
+        tool_args.append("--strict")
+    if getattr(args, "force", False):
+        tool_args.append("--force")
+    if args.repo_command == "brief" and args.format == "json":
+        tool_args += ["--format", "json"]
+    code, data, stderr = run_tool("de_repo.py", tool_args, expect_failure=True)
+    if args.repo_command == "brief" and args.format != "json":
+        text = data.get("raw_stdout", "")
+        if text:
+            print(text, end="" if text.endswith("\n") else "\n")
+            return code
+    title = {
+        "init": "Repo Init",
+        "refresh": "Repo Refresh",
+        "doctor": "Repo Doctor",
+        "commands": "Repo Commands",
+        "policy": "Repo Policy",
+        "install-agents-md": "Repo AGENTS.md Install",
+    }.get(args.repo_command, "Repo")
+    text = render_repo_text(title, data)
+    markdown = f"# {title}\n\n```text\n{text}\n```\n"
+    print_output(data, args.format, text, markdown)
+    return code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="de",
@@ -551,6 +617,28 @@ def build_parser() -> argparse.ArgumentParser:
     auth = sub.add_parser("auth", help="Show enterprise auth posture")
     add_format_arg(auth)
     auth.set_defaults(func=cmd_auth)
+
+    repo = sub.add_parser("repo", help="Repo-specific data-engineering onboarding")
+    repo_sub = repo.add_subparsers(dest="repo_command", required=True)
+    for name, help_text in [
+        ("init", "Create .de-opencode repo context artifacts"),
+        ("refresh", "Refresh .de-opencode repo context artifacts"),
+        ("doctor", "Check repo context health"),
+        ("brief", "Print repo brief"),
+        ("commands", "Print detected repo commands"),
+        ("policy", "Print detected repo safety policy"),
+        ("install-agents-md", "Opt-in AGENTS.md generation from repo context"),
+    ]:
+        item = repo_sub.add_parser(name, help=help_text)
+        item.add_argument("--root")
+        if name in {"init", "refresh"}:
+            item.add_argument("--max-files", type=int, default=2000)
+        if name == "doctor":
+            item.add_argument("--strict", action="store_true")
+        if name == "install-agents-md":
+            item.add_argument("--force", action="store_true")
+        add_format_arg(item)
+        item.set_defaults(func=cmd_repo_proxy)
 
     workbench = sub.add_parser("workbench", help="Unified data-engineering skill workbench")
     workbench_sub = workbench.add_subparsers(dest="workbench_command", required=True)

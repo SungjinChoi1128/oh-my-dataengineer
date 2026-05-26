@@ -31,6 +31,13 @@ Assert-Exists (Join-Path $ToolDir "de_config.py")
 & $Python (Join-Path $ToolDir "de_ado.py") classify --operation "pipeline-list" | Out-Null
 & $Python (Join-Path $ToolDir "de.py") ado query --help | Out-Null
 & $Python (Join-Path $ToolDir "de.py") ado work-item --help | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $env:TEMP "de-opencode-repo-smoke\sql") | Out-Null
+Set-Content -Encoding ASCII -Path (Join-Path $env:TEMP "de-opencode-repo-smoke\databricks.yml") -Value "bundle:`n  name: smoke"
+Set-Content -Encoding ASCII -Path (Join-Path $env:TEMP "de-opencode-repo-smoke\azure-pipelines.yml") -Value "trigger: none"
+Set-Content -Encoding ASCII -Path (Join-Path $env:TEMP "de-opencode-repo-smoke\sql\smoke.sql") -Value "SELECT 1;"
+& $Python (Join-Path $ToolDir "de.py") repo init --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
+& $Python (Join-Path $ToolDir "de.py") repo doctor --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
+& $Python (Join-Path $ToolDir "de.py") repo brief --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") workbench catalog | Out-Null
 & $Python (Join-Path $ToolDir "de.py") ado bulk preview --file (Join-Path $InstallRoot "samples\ado-work-items\bulk-updates.csv") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") security checklist | Out-Null

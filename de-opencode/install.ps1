@@ -45,6 +45,7 @@ $commands = @{
   "de-pipeline" = "de_pipeline.py"
   "de-ledger" = "de_ledger.py"
   "de-quality" = "de_quality.py"
+  "de-repo" = "de_repo.py"
   "de-release" = "de_release.py"
   "de-workbench" = "de_workbench.py"
 }

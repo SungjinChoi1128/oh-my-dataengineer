@@ -24,6 +24,8 @@ Then open a new terminal and run:
 de-config doctor
 de doctor
 de auth
+de repo init
+de repo brief
 de workbench catalog
 de workbench capabilities
 de workbench triage --request "sprint backlog refinement"

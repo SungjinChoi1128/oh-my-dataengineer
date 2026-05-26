@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -39,6 +40,7 @@ def main() -> int:
         TOOLS / "de_pipeline.py",
         TOOLS / "de_ledger.py",
         TOOLS / "de_workbench.py",
+        TOOLS / "de_repo.py",
     ]
     for path in required:
         if not path.exists():
@@ -60,6 +62,28 @@ def main() -> int:
     umbrella_auth = run_tool("de.py", "auth")
     assert "Enterprise Auth" in umbrella_auth
     assert ".env supported: False" in umbrella_auth
+
+    repo_fixture = Path(tempfile.gettempdir()) / "de-opencode-repo-context-smoke"
+    if repo_fixture.exists():
+        shutil.rmtree(repo_fixture)
+    (repo_fixture / "sql").mkdir(parents=True)
+    (repo_fixture / "tests").mkdir()
+    (repo_fixture / "databricks.yml").write_text("bundle:\n  name: smoke\n", encoding="utf-8")
+    (repo_fixture / "azure-pipelines.yml").write_text("trigger: none\n", encoding="utf-8")
+    (repo_fixture / "sql" / "load_orders.sql").write_text("SELECT 1;\n", encoding="utf-8")
+    (repo_fixture / "tests" / "test_smoke.py").write_text("def test_smoke():\n    assert True\n", encoding="utf-8")
+    repo_init = assert_json(run_tool("de_repo.py", "init", "--root", str(repo_fixture)))
+    assert repo_init["status"] == "ok"
+    assert "databricks-bundle" in repo_init["summary"]["repo_types"]
+    assert (repo_fixture / ".de-opencode" / "repo-context.json").exists()
+    repo_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
+    assert repo_doctor["status"] == "ok"
+    repo_brief = run_tool("de.py", "repo", "brief", "--root", str(repo_fixture))
+    assert "Repo Brief" in repo_brief
+    agents = assert_json(run_tool("de_repo.py", "install-agents-md", "--root", str(repo_fixture)))
+    assert agents["status"] == "ok"
+    agents_blocked = assert_json(run_tool("de_repo.py", "install-agents-md", "--root", str(repo_fixture), expect=1))
+    assert agents_blocked["status"] == "blocked"
 
     dbsql = assert_json(run_tool("de_dbsql.py", "classify", "--sql", "SELECT 1"))
     assert dbsql["category"] == "readonly"

@@ -31,6 +31,7 @@ write_wrapper de-ado de_ado.py
 write_wrapper de-pipeline de_pipeline.py
 write_wrapper de-ledger de_ledger.py
 write_wrapper de-quality de_quality.py
+write_wrapper de-repo de_repo.py
 write_wrapper de-release de_release.py
 write_wrapper de-workbench de_workbench.py
 
