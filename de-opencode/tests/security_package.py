@@ -33,6 +33,7 @@ def main() -> int:
     assert permissions["de_repo_doctor"] == "allow"
     assert permissions["de_repo_brief"] == "allow"
     assert permissions["de_repo_contract"] == "allow"
+    assert permissions["de_repo_todo"] == "allow"
     assert permissions["de_repo_interview"] == "allow"
     assert permissions["de_workbench_catalog"] == "allow"
     assert permissions["de_workbench_capabilities"] == "allow"
@@ -56,11 +57,13 @@ def main() -> int:
     assert permissions["bash"]["de auth*"] == "allow"
     assert permissions["bash"]["de repo init*"] == "allow"
     assert permissions["bash"]["de repo contract*"] == "allow"
+    assert permissions["bash"]["de repo todo*"] == "allow"
     assert permissions["bash"]["de repo interview*"] == "allow"
     assert permissions["bash"]["de repo install-agents-md*"] == "ask"
     assert permissions["bash"]["de repo install-contract*"] == "ask"
     assert permissions["bash"]["de-repo init*"] == "allow"
     assert permissions["bash"]["de-repo contract*"] == "allow"
+    assert permissions["bash"]["de-repo todo*"] == "allow"
     assert permissions["bash"]["de-repo interview*"] == "allow"
     assert permissions["bash"]["de-repo install-contract*"] == "ask"
     assert permissions["bash"]["de workbench capabilities*"] == "allow"
@@ -80,6 +83,7 @@ def main() -> int:
         "de_repo_doctor",
         "de_repo_brief",
         "de_repo_contract",
+        "de_repo_todo",
         "de_repo_interview",
         "de_workbench_catalog",
         "de_workbench_capabilities",
@@ -144,6 +148,7 @@ def main() -> int:
     assert "Repo Onboarding" in read("docs/user-manual.md")
     assert "Compact DE.md" in read("docs/repo-onboarding.md")
     assert "Opt-In Agent Files" in read("docs/repo-onboarding.md")
+    assert "Short Next Actions" in read("docs/repo-onboarding.md")
     assert "Initialized-Only Interview" in read("docs/repo-onboarding.md")
     assert "Keep It Light Principles" in read("docs/checkpoint-audit.md")
     assert "Azure DevOps Workflows" in read("docs/user-manual.md")
@@ -162,6 +167,7 @@ def main() -> int:
     assert "mssql query --help" in read("smoke.ps1")
     assert "repo init --root" in read("smoke.ps1")
     assert "repo contract --root" in read("smoke.ps1")
+    assert "repo todo --root" in read("smoke.ps1")
     assert "repo interview --root" in read("smoke.ps1")
     assert "write_wrapper de de.py" in read("install-wsl.sh")
     assert "write_wrapper de-databricks de_databricks.py" in read("install-wsl.sh")

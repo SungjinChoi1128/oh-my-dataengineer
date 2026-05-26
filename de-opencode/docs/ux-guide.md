@@ -12,6 +12,7 @@ de auth
 de repo init
 de repo contract
 de repo brief
+de repo todo
 de repo interview
 de workbench catalog
 de workbench capabilities

@@ -17,10 +17,11 @@ de repo doctor
 de repo init
 de repo contract
 de repo brief
+de repo todo
 de repo interview
 ```
 
-If repo context already exists, it should use `de repo contract`, `de repo brief`, `de repo interview`, and `de repo commands` instead of rescanning immediately.
+If repo context already exists, it should use `de repo contract`, `de repo brief`, `de repo todo`, `de repo interview`, and `de repo commands` instead of rescanning immediately.
 
 ## CLI UX
 
@@ -29,6 +30,7 @@ de repo init
 de repo doctor
 de repo contract
 de repo brief
+de repo todo
 de repo interview
 de repo commands
 de repo policy
@@ -41,13 +43,15 @@ de repo refresh
 .de-opencode/repo-context.json
 .de-opencode/DE.md
 .de-opencode/repo-brief.md
+.de-opencode/next-actions.md
+.de-opencode/next-actions.json
 .de-opencode/repo-interview.md
 .de-opencode/repo-interview.json
 .de-opencode/commands.json
 .de-opencode/safety-policy.json
 ```
 
-These files are reviewable. They contain detected repo shape, a compact data-engineering contract, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
+These files are reviewable. They contain detected repo shape, a compact data-engineering contract, short next actions, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
 
 ## Compact DE.md
 
@@ -60,6 +64,12 @@ de repo contract
 ```
 
 Do not turn `DE.md` into a full handbook. Detailed repo facts belong in `repo-brief.md`, command details in `commands.json`, and approval rules in `safety-policy.json`.
+
+## Short Next Actions
+
+`de repo todo` prints a compact action list based on repo signals. It exists to stop onboarding from becoming a context dump.
+
+Typical actions include auth posture, safe default environment, Pipeline Doctor, Bundle Doctor, SQL policy checks, missing verification evidence, and risk-zone review.
 
 ## Initialized-Only Interview
 

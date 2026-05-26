@@ -22,6 +22,7 @@ python3 de-opencode/tools/de.py repo init --root /private/tmp/de-opencode-repo-c
 python3 de-opencode/tools/de.py repo doctor --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py repo contract --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py repo brief --root /private/tmp/de-opencode-repo-context-smoke
+python3 de-opencode/tools/de.py repo todo --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py repo interview --root /private/tmp/de-opencode-repo-context-smoke --format json --max-questions 8
 python3 de-opencode/tools/de.py workbench catalog
 python3 de-opencode/tools/de.py workbench capabilities --domain ado
@@ -46,6 +47,7 @@ env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de auth
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo init --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de-repo doctor --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo contract --root /private/tmp/de-opencode-repo-context-smoke
+env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo todo --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo interview --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de-workbench catalog
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de workbench capabilities --domain ado
@@ -70,7 +72,7 @@ Results:
 - `opencode.json` parsed as valid JSON.
 - `de doctor` produced a human-readable readiness report and JSON output mode worked.
 - `de auth` reported `.env supported: False`, safe-default posture, and enterprise-ready status based on configured modern auth rather than mere absence of legacy secrets.
-- `de repo init`, `de repo doctor`, `de repo contract`, `de repo brief`, and `de repo interview` generated and read repo-local `.de-opencode` context artifacts without requiring secret files.
+- `de repo init`, `de repo doctor`, `de repo contract`, `de repo brief`, `de repo todo`, and `de repo interview` generated and read repo-local `.de-opencode` context artifacts without requiring secret files.
 - `de workbench catalog`, `de workbench capabilities`, and `de workbench triage` exposed all existing package skills and domain coverage through one front door.
 - `de ado refine` produced sprint/backlog refinement findings for missing acceptance criteria, child tasks, estimates, assignees, stale active work, and iteration gaps.
 - `de ado bulk preview` generated a non-mutating bulk update preview with approval required.

@@ -222,7 +222,7 @@ def risk_zones(rels: list[str]) -> list[dict[str, str]]:
 
 def command_catalog(signals: dict, important: dict[str, list[str]]) -> dict[str, list[str]]:
     commands: dict[str, list[str]] = {
-        "onboarding": ["de repo doctor", "de repo brief", "de repo commands"],
+        "onboarding": ["de repo doctor", "de repo contract", "de repo brief", "de repo todo", "de repo commands"],
         "security": ["de auth", "de security checklist --scope client-review"],
     }
     if signals.get("azure_pipelines"):
@@ -381,6 +381,97 @@ def build_interview(context: dict) -> dict:
     }
 
 
+def build_next_actions(context: dict) -> dict:
+    signals = context.get("signals", {})
+    actions: list[dict[str, str]] = []
+
+    def add(action_id: str, priority: str, action: str, reason: str, command: str = "") -> None:
+        actions.append({
+            "id": action_id,
+            "priority": priority,
+            "action": action,
+            "reason": reason,
+            "command": command,
+        })
+
+    add(
+        "confirm-auth-posture",
+        "high",
+        "Confirm enterprise auth posture before live ADO, Databricks, or MSSQL use.",
+        "The package can guard execution, but client auth setup is outside repo scanning.",
+        "de auth",
+    )
+    add(
+        "confirm-safe-environment",
+        "high",
+        "Answer the safe default environment question from repo interview.",
+        "The agent must not infer dev/test/prod boundaries from file names.",
+        "de repo interview --max-questions 3",
+    )
+    if "unknown" in context.get("repo_types", []):
+        add(
+            "explain-repo-purpose",
+            "high",
+            "Tell the agent what this repo is responsible for and what it must never assume.",
+            "The scanner could not classify the repo confidently.",
+            "de repo interview --max-questions 5",
+        )
+    if signals.get("azure_pipelines"):
+        pipeline_cmds = context.get("commands", {}).get("pipeline", [])
+        add(
+            "pipeline-preflight",
+            "high",
+            "Run Pipeline Doctor before changing or rerunning Azure Pipelines.",
+            "Pipeline YAML was detected and reruns can affect shared environments.",
+            pipeline_cmds[0] if pipeline_cmds else "de pipeline preflight --pipeline-yaml azure-pipelines.yml",
+        )
+    if signals.get("databricks_bundle"):
+        db_cmds = context.get("commands", {}).get("databricks", [])
+        add(
+            "databricks-bundle-check",
+            "high",
+            "Run Bundle Doctor before Databricks deploy/run work.",
+            "Databricks bundle files were detected.",
+            db_cmds[0] if db_cmds else "de databricks bundle-doctor --bundle-yaml databricks.yml",
+        )
+    if signals.get("sql") or signals.get("mssql_or_tsql"):
+        add(
+            "sql-safety-first",
+            "high",
+            "Classify SQL and check MSSQL policy before live query work.",
+            "SQL assets were detected, so live execution needs explicit safety posture.",
+            "de-mssql policy-check",
+        )
+    if not signals.get("tests"):
+        add(
+            "define-verification",
+            "medium",
+            "Define the test command or manual evidence expected for this repo.",
+            "No obvious test surface was detected.",
+            "de repo interview --max-questions 8",
+        )
+    if context.get("risk_zones"):
+        add(
+            "review-risk-zones",
+            "medium",
+            "Review detected risk-zone files and label which ones are production-affecting.",
+            "File names suggest deploy, notebook, pipeline, production, or SQL mutation risk.",
+            "de repo brief",
+        )
+    add(
+        "read-compact-contract",
+        "medium",
+        "Use compact DE.md for behavior and lazy-read detailed context only when needed.",
+        "This keeps the agent controlled without heavy always-loaded context.",
+        "de repo contract",
+    )
+    return {
+        "status": "ready",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "actions": actions[:10],
+    }
+
+
 def render_de_contract(context: dict) -> str:
     repo_types = ", ".join(context.get("repo_types", ["unknown"]))
     signals = [key for key, value in context.get("signals", {}).items() if value]
@@ -433,6 +524,8 @@ def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, 
         "context": target / "repo-context.json",
         "brief": target / "repo-brief.md",
         "contract": target / "DE.md",
+        "next_actions": target / "next-actions.md",
+        "next_actions_json": target / "next-actions.json",
         "interview": target / "repo-interview.md",
         "interview_json": target / "repo-interview.json",
         "commands": target / "commands.json",
@@ -441,6 +534,8 @@ def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, 
     paths["context"].write_text(json.dumps(context, indent=2) + "\n", encoding="utf-8")
     paths["brief"].write_text(render_brief(context) + "\n", encoding="utf-8")
     paths["contract"].write_text(render_de_contract(context) + "\n", encoding="utf-8")
+    paths["next_actions"].write_text(render_next_actions(context) + "\n", encoding="utf-8")
+    paths["next_actions_json"].write_text(json.dumps(context["next_actions"], indent=2) + "\n", encoding="utf-8")
     paths["interview"].write_text(render_interview(context) + "\n", encoding="utf-8")
     paths["interview_json"].write_text(json.dumps(context["interview"], indent=2) + "\n", encoding="utf-8")
     paths["commands"].write_text(json.dumps(context["commands"], indent=2) + "\n", encoding="utf-8")
@@ -493,6 +588,32 @@ def render_brief(context: dict) -> str:
     if context.get("interview", {}).get("questions"):
         lines += ["", "", "## Suggested Interview", ""]
         lines.append("- Run `de repo interview` after initialization to ask targeted repo questions.")
+    if context.get("next_actions", {}).get("actions"):
+        lines += ["", "", "## Next Actions", ""]
+        lines.append("- Run `de repo todo` for the short repo-specific action list.")
+    return "\n".join(lines).rstrip()
+
+
+def render_next_actions(context: dict) -> str:
+    next_actions = context.get("next_actions") or build_next_actions(context)
+    lines = [
+        f"# Repo Next Actions: {context['repo_name']}",
+        "",
+        f"Generated: {next_actions.get('generated_at', context.get('generated_at', 'unknown'))}",
+        "",
+        "Short, repo-specific actions only. Keep detailed analysis in `repo-brief.md`.",
+        "",
+    ]
+    for item in next_actions.get("actions", []):
+        lines.append(f"## {item['id']} ({item['priority']})")
+        lines.append("")
+        lines.append(item["action"])
+        lines.append("")
+        lines.append(f"Why: {item['reason']}")
+        if item.get("command"):
+            lines.append("")
+            lines.append(f"Command: `{item['command']}`")
+        lines.append("")
     return "\n".join(lines).rstrip()
 
 
@@ -544,6 +665,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     files = iter_repo_files(root, args.max_files)
     context = detect_repo(root, files)
     context["interview"] = build_interview(context)
+    context["next_actions"] = build_next_actions(context)
     artifacts = write_artifacts(root, context)
     result = {"status": "ok", "root": str(root), "artifacts": artifacts, "summary": summary(context)}
     print(json.dumps(result, indent=2))
@@ -557,7 +679,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     if context is None:
         issues.append("Repo context not initialized. Run `de repo init`.")
     else:
-        for name in ("repo-brief.md", "DE.md", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
+        for name in ("repo-brief.md", "DE.md", "next-actions.md", "next-actions.json", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
             if not (root / CONTEXT_DIR / name).exists():
                 issues.append(f"Missing {CONTEXT_DIR}/{name}. Run `de repo refresh`.")
     agents_md = root / "AGENTS.md"
@@ -619,6 +741,27 @@ def cmd_interview(args: argparse.Namespace) -> int:
         print(json.dumps(data, indent=2))
     else:
         print(render_interview({**context, "interview": {**context["interview"], "questions": questions}}))
+    return 0
+
+
+def cmd_todo(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    context = load_context(root)
+    if context is None:
+        print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before generating repo next actions."}, indent=2))
+        return 1
+    if "next_actions" not in context:
+        context["next_actions"] = build_next_actions(context)
+    data = {
+        "status": "ok",
+        "root": str(root),
+        "action_count": len(context["next_actions"].get("actions", [])),
+        "actions": context["next_actions"].get("actions", []),
+    }
+    if args.format == "json":
+        print(json.dumps(data, indent=2))
+    else:
+        print(render_next_actions(context))
     return 0
 
 
@@ -712,7 +855,7 @@ def summary(context: dict) -> dict:
         "repo_types": context["repo_types"],
         "signals": {key: value for key, value in context["signals"].items() if value},
         "risk_count": len(context["risk_zones"]),
-        "next_commands": ["de repo contract", "de repo brief", "de repo interview", "de repo doctor", "de repo commands"],
+        "next_commands": ["de repo contract", "de repo brief", "de repo todo", "de repo interview", "de repo doctor", "de repo commands"],
     }
 
 
@@ -743,6 +886,10 @@ def build_parser() -> argparse.ArgumentParser:
     add_root(contract)
     contract.add_argument("--format", choices=["markdown", "json"], default="markdown")
     contract.set_defaults(func=cmd_contract)
+    todo = sub.add_parser("todo", help="Print short repo-specific next actions")
+    add_root(todo)
+    todo.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    todo.set_defaults(func=cmd_todo)
     interview = sub.add_parser("interview", help="Print initialized repo-specific user interview questions")
     add_root(interview)
     interview.add_argument("--format", choices=["markdown", "json"], default="markdown")

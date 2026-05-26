@@ -575,12 +575,12 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         tool_args.append("--force")
     if getattr(args, "target", None):
         tool_args += ["--target", args.target]
-    if args.repo_command in {"brief", "contract", "interview"} and args.format == "json":
+    if args.repo_command in {"brief", "contract", "interview", "todo"} and args.format == "json":
         tool_args += ["--format", "json"]
     if args.repo_command == "interview" and getattr(args, "max_questions", None):
         tool_args += ["--max-questions", str(args.max_questions)]
     code, data, stderr = run_tool("de_repo.py", tool_args, expect_failure=True)
-    if args.repo_command in {"brief", "contract", "interview"} and args.format != "json":
+    if args.repo_command in {"brief", "contract", "interview", "todo"} and args.format != "json":
         text = data.get("raw_stdout", "")
         if text:
             print(text, end="" if text.endswith("\n") else "\n")
@@ -591,6 +591,7 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         "doctor": "Repo Doctor",
         "commands": "Repo Commands",
         "contract": "Repo Contract",
+        "todo": "Repo Todo",
         "interview": "Repo Interview",
         "policy": "Repo Policy",
         "install-agents-md": "Repo AGENTS.md Install",
@@ -633,6 +634,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("doctor", "Check repo context health"),
         ("brief", "Print repo brief"),
         ("contract", "Print compact data-engineering agent contract"),
+        ("todo", "Print short repo-specific next actions"),
         ("interview", "Print initialized repo-specific user interview questions"),
         ("commands", "Print detected repo commands"),
         ("policy", "Print detected repo safety policy"),

@@ -79,6 +79,7 @@ def main() -> int:
     assert "databricks-bundle" in repo_init["summary"]["repo_types"]
     assert (repo_fixture / ".de-opencode" / "repo-context.json").exists()
     assert (repo_fixture / ".de-opencode" / "DE.md").exists()
+    assert (repo_fixture / ".de-opencode" / "next-actions.md").exists()
     assert (repo_fixture / ".de-opencode" / "repo-interview.md").exists()
     repo_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
     assert repo_doctor["status"] == "ok"
@@ -88,6 +89,11 @@ def main() -> int:
     assert len(repo_contract.splitlines()) <= 60
     repo_brief = run_tool("de.py", "repo", "brief", "--root", str(repo_fixture))
     assert "Repo Brief" in repo_brief
+    repo_todo = assert_json(run_tool("de.py", "repo", "todo", "--root", str(repo_fixture), "--format", "json"))
+    assert repo_todo["status"] == "ok"
+    assert any(action["id"] == "confirm-auth-posture" for action in repo_todo["actions"])
+    assert any(action["id"] == "databricks-bundle-check" for action in repo_todo["actions"])
+    assert any(action["id"] == "pipeline-preflight" for action in repo_todo["actions"])
     repo_commands = assert_json(run_tool("de_repo.py", "commands", "--root", str(repo_fixture)))
     assert 'de databricks sql execute --sql "SELECT 1" --dry-run-only' in repo_commands["databricks"]
     assert "de-mssql policy-check" in repo_commands["mssql"]

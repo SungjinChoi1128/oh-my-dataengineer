@@ -8,12 +8,13 @@
 de repo init
 de repo contract
 de repo brief
+de repo todo
 de workbench catalog
 de workbench capabilities
 de workbench triage --request "refine sprint backlog for Databricks migration"
 ```
 
-Use `de repo init` when first entering a client repo. It creates reviewable `.de-opencode/*` context artifacts so the agent can understand repo shape, a compact DE contract, important files, risk zones, and safe commands.
+Use `de repo init` when first entering a client repo. It creates reviewable `.de-opencode/*` context artifacts so the agent can understand repo shape, a compact DE contract, short next actions, important files, risk zones, and safe commands.
 
 ## ADO Sprint / Backlog
 
@@ -29,8 +30,9 @@ Use this for backlog refinement, sprint planning, missing acceptance criteria, s
 
 ```bash
 de databricks bundle-doctor --bundle-yaml databricks.yml --pipeline-yaml azure-pipelines.yml
-de databricks sql execute --sql "SELECT 1"
+de databricks sql execute --sql "SELECT 1" --dry-run-only
 de mssql assess --metadata-file inventory.json
+de-mssql policy-check
 de mssql query --sql "SELECT TOP 10 * FROM dbo.Customers" --server sql01 --database EDW
 de migration plan --objects-file object-map.json --source mssql --target databricks
 ```

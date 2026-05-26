@@ -39,6 +39,7 @@ Set-Content -Encoding ASCII -Path (Join-Path $env:TEMP "de-opencode-repo-smoke\s
 & $Python (Join-Path $ToolDir "de.py") repo doctor --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") repo contract --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") repo brief --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
+& $Python (Join-Path $ToolDir "de.py") repo todo --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") repo interview --root (Join-Path $env:TEMP "de-opencode-repo-smoke") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") workbench catalog | Out-Null
 & $Python (Join-Path $ToolDir "de.py") ado bulk preview --file (Join-Path $InstallRoot "samples\ado-work-items\bulk-updates.csv") | Out-Null

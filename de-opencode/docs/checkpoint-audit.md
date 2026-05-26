@@ -33,6 +33,6 @@ This is the brutally honest product checkpoint for `de-opencode` after the repo-
 
 1. Safer UX defaults: all docs and generated commands should show dry-run/classify/policy-check before live query examples.
 2. Better repo context with no extra runtime: parse `databricks.yml` target names and Azure Pipeline stage/environment names using lightweight text/YAML heuristics.
-3. Add `de repo todo`: a short generated next-action list based on missing auth, missing tests, missing safe environment, or detected prod risk.
+3. Keep improving `de repo todo`: the first short generated next-action list now exists; next useful refinement is lightweight bundle target and pipeline environment parsing.
 4. Add Windows evidence loop: ask one Windows 11 user to run `smoke.ps1` and paste output into `docs/verification-evidence.md`.
 5. Improve ADO sprint UX later by adding an approved apply path only after bulk preview has evidence and explicit approval.
