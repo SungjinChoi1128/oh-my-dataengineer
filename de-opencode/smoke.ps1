@@ -23,8 +23,14 @@ Assert-Exists (Join-Path $ToolDir "de_config.py")
 & $Python (Join-Path $ToolDir "de.py") databricks runtime-advisor --current-runtime "15.4" --target-runtime "16.4" | Out-Null
 & $Python (Join-Path $ToolDir "de_databricks.py") bundle-doctor --bundle-yaml (Join-Path $InstallRoot "samples\databricks-bundle\databricks.good.yml") | Out-Null
 & $Python (Join-Path $ToolDir "de_dbsql.py") classify --sql "SELECT 1" | Out-Null
+& $Python (Join-Path $ToolDir "de_dbsql.py") execute --sql "SELECT 1" --dry-run-only --format json | Out-Null
+& $Python (Join-Path $ToolDir "de.py") databricks sql execute --sql "SELECT 1" --dry-run-only --result-format json | Out-Null
+& $Python (Join-Path $ToolDir "de.py") databricks sql warehouses --help | Out-Null
 & $Python (Join-Path $ToolDir "de_mssql.py") classify --sql "SELECT 1" | Out-Null
+& $Python (Join-Path $ToolDir "de.py") mssql query --help | Out-Null
 & $Python (Join-Path $ToolDir "de_ado.py") classify --operation "pipeline-list" | Out-Null
+& $Python (Join-Path $ToolDir "de.py") ado query --help | Out-Null
+& $Python (Join-Path $ToolDir "de.py") ado work-item --help | Out-Null
 & $Python (Join-Path $ToolDir "de.py") workbench catalog | Out-Null
 & $Python (Join-Path $ToolDir "de.py") ado bulk preview --file (Join-Path $InstallRoot "samples\ado-work-items\bulk-updates.csv") | Out-Null
 & $Python (Join-Path $ToolDir "de.py") security checklist | Out-Null

@@ -181,8 +181,8 @@
     },
     {
       "path": "smoke.ps1",
-      "bytes": 1919,
-      "sha256": "ecf5282aa529ddd8d15c6081a048bfdda8658833ad52df9dac15de431c1e7f84"
+      "bytes": 2445,
+      "sha256": "87dd06c7f127c1ae735524245cfa7c85dbaab5cd7c1b68feb5bac3c299f234cd"
     },
     {
       "path": "templates/azure-pipelines/databricks-bundle-ci.yml",
@@ -191,8 +191,8 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 6890,
-      "sha256": "4333019f6d22a331c9361270825217e9636b18ee871d6f071a3405bebcaf9bfb"
+      "bytes": 7083,
+      "sha256": "bb07eb64ecf64c1bcbf899b07920cd208387b0cced4ab489605f414305a9c355"
     },
     {
       "path": "tests/smoke.py",
