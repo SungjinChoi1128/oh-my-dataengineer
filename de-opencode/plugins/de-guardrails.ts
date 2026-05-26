@@ -97,6 +97,24 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           ])
         },
       }),
+      de_repo_reset: tool({
+        description: "Archive existing .de-opencode repo context and reinitialize it for integration repos or branch changes.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          maxFiles: tool.schema.number().optional().describe("Maximum files to scan after reset."),
+          archiveDir: tool.schema.string().optional().describe("Optional archive parent directory. Defaults to .de-opencode-archive."),
+          noInit: tool.schema.boolean().optional().describe("Only archive context; do not reinitialize."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", [
+            "reset",
+            ...(args.root ? ["--root", args.root] : []),
+            ...(args.maxFiles ? ["--max-files", String(args.maxFiles)] : []),
+            ...(args.archiveDir ? ["--archive-dir", args.archiveDir] : []),
+            ...(args.noInit ? ["--no-init"] : []),
+          ])
+        },
+      }),
       de_repo_doctor: tool({
         description: "Check whether repo-local de-opencode context is initialized and healthy.",
         args: {

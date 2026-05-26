@@ -65,6 +65,7 @@ Run these before trusting the package in a client context:
 de doctor
 de auth
 de repo init
+de repo reset
 de repo brief
 de workbench catalog
 de workbench capabilities
@@ -76,6 +77,7 @@ What they tell you:
 - `de doctor`: local runtime, installed CLIs, redacted config state, and missing keys.
 - `de auth`: whether `.env` is unsupported, whether legacy secrets are present, and whether modern auth is configured.
 - `de repo init`: create repo-local context artifacts for the current project.
+- `de repo reset`: archive stale repo-local context and reinitialize it after branch or integration-repo context changes.
 - `de repo brief`: show the detected repo shape, important files, risk zones, and safe commands.
 - `de workbench catalog`: what skills and workflows the package exposes.
 - `de workbench capabilities`: what ADO, Databricks, MSSQL, and migration capability is covered.
@@ -135,6 +137,7 @@ The `data-engineer` agent should run:
 ```bash
 de repo doctor
 de repo init
+de repo reset
 de repo contract
 de repo brief
 de repo todo
@@ -162,11 +165,14 @@ de repo interview
 de repo commands
 de repo policy
 de repo refresh
+de repo reset
 ```
 
 `de repo contract` prints compact `.de-opencode/DE.md`: the small data-engineering operating contract for the repo. Keep it short; put detailed facts in `repo-brief.md`.
 
 `de repo todo` prints the short next-action list, such as auth posture, safe environment, Pipeline Doctor, Bundle Doctor, SQL policy check, missing verification, or risk-zone review.
+
+`de repo reset` is for integration repos and branch switches. It archives old `.de-opencode` context into `.de-opencode-archive/` by default and then creates fresh context. Use `de repo reset --force` only when you intentionally want to delete old generated context instead of archiving it.
 
 `de repo interview` only works after initialization. It turns detected repo facts into targeted questions, such as safe default environment, ADO project/sprint defaults, Databricks bundle targets, SQL execution boundaries, and required handoff evidence.
 

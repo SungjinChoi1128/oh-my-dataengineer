@@ -30,6 +30,7 @@ def main() -> int:
     assert permissions["de_databricks_runtime_advisor"] == "allow"
     assert permissions["de_config_auth"] == "allow"
     assert permissions["de_repo_init"] == "allow"
+    assert permissions["de_repo_reset"] == "allow"
     assert permissions["de_repo_doctor"] == "allow"
     assert permissions["de_repo_brief"] == "allow"
     assert permissions["de_repo_contract"] == "allow"
@@ -59,12 +60,14 @@ def main() -> int:
     assert permissions["bash"]["de quality verdict *"] == "allow"
     assert permissions["bash"]["de auth*"] == "allow"
     assert permissions["bash"]["de repo init*"] == "allow"
+    assert permissions["bash"]["de repo reset*"] == "allow"
     assert permissions["bash"]["de repo contract*"] == "allow"
     assert permissions["bash"]["de repo todo*"] == "allow"
     assert permissions["bash"]["de repo interview*"] == "allow"
     assert permissions["bash"]["de repo install-agents-md*"] == "ask"
     assert permissions["bash"]["de repo install-contract*"] == "ask"
     assert permissions["bash"]["de-repo init*"] == "allow"
+    assert permissions["bash"]["de-repo reset*"] == "allow"
     assert permissions["bash"]["de-repo contract*"] == "allow"
     assert permissions["bash"]["de-repo todo*"] == "allow"
     assert permissions["bash"]["de-repo interview*"] == "allow"
@@ -84,6 +87,7 @@ def main() -> int:
         "de_config_doctor",
         "de_config_auth",
         "de_repo_init",
+        "de_repo_reset",
         "de_repo_doctor",
         "de_repo_brief",
         "de_repo_contract",
@@ -144,6 +148,7 @@ def main() -> int:
     assert (ROOT / "docs" / "ux-guide.md").exists()
     assert "de auth" in read("README.md")
     assert "de done" in read("README.md")
+    assert "de repo reset" in read("README.md")
     assert "de workbench capabilities" in read("README.md")
     assert "docs/user-manual.md" in read("README.md")
     assert "docs/repo-onboarding.md" in read("README.md")
@@ -152,6 +157,7 @@ def main() -> int:
     assert "de-mssql policy-check" in read("README.md")
     assert "What You Use It For" in read("docs/user-manual.md")
     assert "Repo Onboarding" in read("docs/user-manual.md")
+    assert "de repo reset" in read("docs/repo-onboarding.md")
     assert "Compact DE.md" in read("docs/repo-onboarding.md")
     assert "Opt-In Agent Files" in read("docs/repo-onboarding.md")
     assert "Short Next Actions" in read("docs/repo-onboarding.md")
@@ -174,6 +180,7 @@ def main() -> int:
     assert "ado query --help" in read("smoke.ps1")
     assert "mssql query --help" in read("smoke.ps1")
     assert "repo init --root" in read("smoke.ps1")
+    assert "repo reset --root" in read("smoke.ps1")
     assert "repo contract --root" in read("smoke.ps1")
     assert "repo todo --root" in read("smoke.ps1")
     assert "repo interview --root" in read("smoke.ps1")

@@ -611,6 +611,10 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         tool_args.append("--strict")
     if getattr(args, "force", False):
         tool_args.append("--force")
+    if getattr(args, "no_init", False):
+        tool_args.append("--no-init")
+    if getattr(args, "archive_dir", None):
+        tool_args += ["--archive-dir", args.archive_dir]
     if getattr(args, "target", None):
         tool_args += ["--target", args.target]
     if args.repo_command in {"brief", "contract", "interview", "todo"} and args.format == "json":
@@ -626,6 +630,7 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
     title = {
         "init": "Repo Init",
         "refresh": "Repo Refresh",
+        "reset": "Repo Reset",
         "doctor": "Repo Doctor",
         "commands": "Repo Commands",
         "contract": "Repo Contract",
@@ -692,6 +697,7 @@ def build_parser() -> argparse.ArgumentParser:
     for name, help_text in [
         ("init", "Create .de-opencode repo context artifacts"),
         ("refresh", "Refresh .de-opencode repo context artifacts"),
+        ("reset", "Archive or delete .de-opencode and reinitialize repo context"),
         ("doctor", "Check repo context health"),
         ("brief", "Print repo brief"),
         ("contract", "Print compact data-engineering agent contract"),
@@ -704,15 +710,18 @@ def build_parser() -> argparse.ArgumentParser:
     ]:
         item = repo_sub.add_parser(name, help=help_text)
         item.add_argument("--root")
-        if name in {"init", "refresh"}:
+        if name in {"init", "refresh", "reset"}:
             item.add_argument("--max-files", type=int, default=2000)
+        if name == "reset":
+            item.add_argument("--archive-dir")
+            item.add_argument("--no-init", action="store_true")
         if name == "doctor":
             item.add_argument("--strict", action="store_true")
         if name == "interview":
             item.add_argument("--max-questions", type=int, default=0)
         if name == "install-contract":
             item.add_argument("--target", choices=["agents", "claude"], default="agents")
-        if name in {"install-agents-md", "install-contract"}:
+        if name in {"install-agents-md", "install-contract", "reset"}:
             item.add_argument("--force", action="store_true")
         add_format_arg(item)
         item.set_defaults(func=cmd_repo_proxy)

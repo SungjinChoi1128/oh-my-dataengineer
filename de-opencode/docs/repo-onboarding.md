@@ -35,6 +35,7 @@ de repo interview
 de repo commands
 de repo policy
 de repo refresh
+de repo reset
 ```
 
 `de repo init` writes:
@@ -52,6 +53,29 @@ de repo refresh
 ```
 
 These files are reviewable. They contain detected repo shape, a compact data-engineering contract, short next actions, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
+
+## Refresh vs Reset
+
+Use `de repo refresh` when the same repo shape changed and you simply want to rescan.
+
+Use `de repo reset` when a shared integration repo, branch switch, or feature area change made the existing `.de-opencode` context stale. Reset archives the old context to `.de-opencode-archive/` by default, then initializes fresh context:
+
+```bash
+de repo reset
+de repo reset --archive-dir .de-opencode-archive
+```
+
+Use `--force` only when you intentionally want to delete the old context instead of archiving it:
+
+```bash
+de repo reset --force
+```
+
+Use `--no-init` when you only want to clear or archive context and leave the repo uninitialized:
+
+```bash
+de repo reset --no-init
+```
 
 ## Compact DE.md
 

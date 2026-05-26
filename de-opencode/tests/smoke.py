@@ -81,6 +81,21 @@ def main() -> int:
     assert (repo_fixture / ".de-opencode" / "DE.md").exists()
     assert (repo_fixture / ".de-opencode" / "next-actions.md").exists()
     assert (repo_fixture / ".de-opencode" / "repo-interview.md").exists()
+    reset = assert_json(run_tool("de.py", "repo", "reset", "--root", str(repo_fixture), "--format", "json"))
+    assert reset["status"] == "ok"
+    assert reset["reset"]["mode"] == "archived"
+    assert reset["reinitialized"] is True
+    assert Path(reset["reset"]["path"]).exists()
+    assert (repo_fixture / ".de-opencode" / "repo-context.json").exists()
+    force_fixture = Path(tempfile.gettempdir()) / "de-opencode-force-reset-smoke"
+    if force_fixture.exists():
+        shutil.rmtree(force_fixture)
+    force_fixture.mkdir()
+    assert_json(run_tool("de_repo.py", "init", "--root", str(force_fixture)))
+    force_reset = assert_json(run_tool("de_repo.py", "reset", "--root", str(force_fixture), "--force", "--no-init"))
+    assert force_reset["reset"]["mode"] == "deleted"
+    assert force_reset["reinitialized"] is False
+    assert not (force_fixture / ".de-opencode").exists()
     repo_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
     assert repo_doctor["status"] == "ok"
     repo_contract = run_tool("de.py", "repo", "contract", "--root", str(repo_fixture))

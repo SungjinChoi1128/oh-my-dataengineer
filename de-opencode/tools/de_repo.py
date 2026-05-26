@@ -8,6 +8,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -30,6 +31,7 @@ IGNORE_DIRS = {
     ".svn",
     ".omx",
     ".de-opencode",
+    ".de-opencode-archive",
     ".venv",
     "venv",
     "env",
@@ -222,7 +224,7 @@ def risk_zones(rels: list[str]) -> list[dict[str, str]]:
 
 def command_catalog(signals: dict, important: dict[str, list[str]]) -> dict[str, list[str]]:
     commands: dict[str, list[str]] = {
-        "onboarding": ["de repo doctor", "de repo contract", "de repo brief", "de repo todo", "de repo commands"],
+        "onboarding": ["de repo doctor", "de repo contract", "de repo brief", "de repo todo", "de repo commands", "de repo reset"],
         "security": ["de auth", "de security checklist --scope client-review"],
     }
     if signals.get("azure_pipelines"):
@@ -662,14 +664,18 @@ def resolve_root(value: Optional[str]) -> Path:
 
 def cmd_init(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    files = iter_repo_files(root, args.max_files)
+    result = initialize_context(root, args.max_files)
+    print(json.dumps(result, indent=2))
+    return 0
+
+
+def initialize_context(root: Path, max_files: int) -> dict:
+    files = iter_repo_files(root, max_files)
     context = detect_repo(root, files)
     context["interview"] = build_interview(context)
     context["next_actions"] = build_next_actions(context)
     artifacts = write_artifacts(root, context)
-    result = {"status": "ok", "root": str(root), "artifacts": artifacts, "summary": summary(context)}
-    print(json.dumps(result, indent=2))
-    return 0
+    return {"status": "ok", "root": str(root), "artifacts": artifacts, "summary": summary(context)}
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -692,6 +698,43 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     }
     print(json.dumps(result, indent=2))
     return 1 if issues and args.strict else 0
+
+
+def cmd_reset(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    context_dir = root / CONTEXT_DIR
+    reset_result = reset_context_dir(root, context_dir, args.force, args.archive_dir)
+    init_result = None if args.no_init else initialize_context(root, args.max_files)
+    result = {
+        "status": "ok",
+        "root": str(root),
+        "context_dir": str(context_dir),
+        "reset": reset_result,
+        "reinitialized": init_result is not None,
+    }
+    if init_result:
+        result["artifacts"] = init_result["artifacts"]
+        result["summary"] = init_result["summary"]
+    print(json.dumps(result, indent=2))
+    return 0
+
+
+def reset_context_dir(root: Path, context_dir: Path, force: bool, archive_dir: Optional[str]) -> dict:
+    if not context_dir.exists():
+        return {"mode": "none", "message": ".de-opencode did not exist; nothing to remove"}
+    if force:
+        shutil.rmtree(context_dir)
+        return {"mode": "deleted", "path": str(context_dir)}
+    archive_root = Path(archive_dir).resolve() if archive_dir else root / ".de-opencode-archive"
+    archive_root.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    target = archive_root / f"de-opencode-{stamp}"
+    suffix = 1
+    while target.exists():
+        suffix += 1
+        target = archive_root / f"de-opencode-{stamp}-{suffix}"
+    shutil.move(str(context_dir), str(target))
+    return {"mode": "archived", "path": str(target)}
 
 
 def cmd_brief(args: argparse.Namespace) -> int:
@@ -855,7 +898,7 @@ def summary(context: dict) -> dict:
         "repo_types": context["repo_types"],
         "signals": {key: value for key, value in context["signals"].items() if value},
         "risk_count": len(context["risk_zones"]),
-        "next_commands": ["de repo contract", "de repo brief", "de repo todo", "de repo interview", "de repo doctor", "de repo commands"],
+        "next_commands": ["de repo contract", "de repo brief", "de repo todo", "de repo interview", "de repo doctor", "de repo commands", "de repo reset"],
     }
 
 
@@ -874,6 +917,13 @@ def build_parser() -> argparse.ArgumentParser:
     add_root(refresh)
     refresh.add_argument("--max-files", type=int, default=2000)
     refresh.set_defaults(func=cmd_init)
+    reset = sub.add_parser("reset", help="Archive or delete .de-opencode and reinitialize repo context")
+    add_root(reset)
+    reset.add_argument("--max-files", type=int, default=2000)
+    reset.add_argument("--archive-dir", help="Archive parent directory; defaults to .de-opencode-archive")
+    reset.add_argument("--force", action="store_true", help="Delete .de-opencode instead of archiving it")
+    reset.add_argument("--no-init", action="store_true", help="Only remove/archive context; do not create fresh context")
+    reset.set_defaults(func=cmd_reset)
     doctor = sub.add_parser("doctor", help="Check repo context health")
     add_root(doctor)
     doctor.add_argument("--strict", action="store_true")

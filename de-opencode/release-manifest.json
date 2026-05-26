@@ -6,8 +6,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 5165,
-      "sha256": "7f3455c2c7f9a1995ee61024343e4b673452a15444a0e37eeea25692e6bbd423"
+      "bytes": 5332,
+      "sha256": "129311b610d31ffddb54ae4a3e17d18668a6eccd73dd4ab525163b5c27d7ea64"
     },
     {
       "path": "VERSION",
@@ -16,18 +16,18 @@
     },
     {
       "path": "agents/data-architect.md",
-      "bytes": 1294,
-      "sha256": "bd70f612b68901ee106c54295cf975c49628a695c2af5c216e28a1eb4a800b62"
+      "bytes": 1424,
+      "sha256": "c74cc4f6dfeb6b17f96b93794d3d5c8262ab48c3407ab0b0ecfe69118904806d"
     },
     {
       "path": "agents/data-devops.md",
-      "bytes": 1419,
-      "sha256": "bd561159b1ab6be77295eef8efd40837c45d93b7dc531557a145dd1e5eeb155e"
+      "bytes": 1541,
+      "sha256": "c056ea85e6faeb5488b47c1062c2fdad0156d3059ecc451912572e03bb74e711"
     },
     {
       "path": "agents/data-engineer.md",
-      "bytes": 3969,
-      "sha256": "f5ccc3c9fd47a634794b718376524d8f45abde7b6ee7fdf3045370120ecc8e95"
+      "bytes": 4251,
+      "sha256": "e875947787286f133603af434b0ecf26c639dbc92abd1caed7147b756c0f3db6"
     },
     {
       "path": "docs/checkpoint-audit.md",
@@ -56,8 +56,8 @@
     },
     {
       "path": "docs/repo-onboarding.md",
-      "bytes": 3965,
-      "sha256": "463ddc7e31a3b380ec37d15d68bdfd4de73cb5cd61d36379015747e0159e192f"
+      "bytes": 4673,
+      "sha256": "6a5901d0f66c852a0fb9906c6175814477dc791513c34328b9c2f95857ec90ae"
     },
     {
       "path": "docs/security-model.md",
@@ -66,18 +66,18 @@
     },
     {
       "path": "docs/user-manual.md",
-      "bytes": 16378,
-      "sha256": "1d7d944fc3b4f81784f6899b8f7e0ed14f9bb5904e6e65a4b41e038134d42584"
+      "bytes": 16834,
+      "sha256": "2f6158dc95de282e7f74f52d5b4a0b2e258dbdda05cf59d4ab92847d13203b1d"
     },
     {
       "path": "docs/ux-guide.md",
-      "bytes": 2025,
-      "sha256": "475ee0cfff0aa33e3b6a2630d41d5897d31dbb2a7a8434851bc51e4ea07c9a1e"
+      "bytes": 2039,
+      "sha256": "3ecf705c3129311a7d441ec8bcfb6eaae764aec433b2994c3b0a9953dee0e6dd"
     },
     {
       "path": "docs/verification-evidence.md",
-      "bytes": 10021,
-      "sha256": "e23d6e2b2182e8e0d799bf86c36fd12080c9a571fa922f04dc1fd832b6b3dbdf"
+      "bytes": 10561,
+      "sha256": "3b5e04e39db39690ccc54a12ceaeb52655240e0fd4a009d96c72c9f8195b107d"
     },
     {
       "path": "docs/windows-11-install.md",
@@ -101,13 +101,13 @@
     },
     {
       "path": "opencode.json",
-      "bytes": 8202,
-      "sha256": "a32207c01811610da73f995df4fe0c88a10d62bbb846ebc25d19fa1384dba045"
+      "bytes": 8372,
+      "sha256": "c650c5a0fabe3b8d42bdff95494b20c32e84b5c7238d22deff605ded7966ac16"
     },
     {
       "path": "plugins/de-guardrails.ts",
-      "bytes": 23280,
-      "sha256": "42feaf2895060032aabeb8c0e47d9f8e5656eb9740970bf0a6bc70a6f221e6b6"
+      "bytes": 24314,
+      "sha256": "2b77dd09874327f3afa71113ca29e4ab0a1038c85a7704c8f533265d438c8f18"
     },
     {
       "path": "samples/ado-pipeline/azure-pipelines.bad.yml",
@@ -191,8 +191,8 @@
     },
     {
       "path": "smoke.ps1",
-      "bytes": 3819,
-      "sha256": "5eae1cc371c692655e87708e617288e1fdc56828489c89689b3bed1f95a71db5"
+      "bytes": 3934,
+      "sha256": "a6af0e6df281f7957ca38fda8ebd0c666c7023d7ec7e639a9ffb45e2fe61d9c5"
     },
     {
       "path": "templates/azure-pipelines/databricks-bundle-ci.yml",
@@ -201,13 +201,13 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 9944,
-      "sha256": "86eacced29921333b773757bc1ab8963e9c17fa1903f2fbd780bc61ba4a2b3ef"
+      "bytes": 10302,
+      "sha256": "262837963f3b656b50258825531d3fb0a2f37309fb31444f03f7f581119fb4cd"
     },
     {
       "path": "tests/smoke.py",
-      "bytes": 14431,
-      "sha256": "3a8a03b8400a552d96bd6a28cec233224b94126e2ae3f1c5a82c5fc3f7263db1"
+      "bytes": 15318,
+      "sha256": "a9d1f7852974eb23ad6ae84f65ad9693633eaea955552e1a08458cfe030a1cdb"
     },
     {
       "path": "tools/__init__.py",
@@ -216,8 +216,8 @@
     },
     {
       "path": "tools/de.py",
-      "bytes": 42693,
-      "sha256": "0ea9ad28f2756e237483f007949e4bd6aa5dd9aa4d5a9c100ede3aa274d1c204"
+      "bytes": 43142,
+      "sha256": "2797b188d7aa54a1dfefdfcde0420cf1ddd9825534053d39c2d47efcad85b310"
     },
     {
       "path": "tools/de_ado.py",
@@ -266,8 +266,8 @@
     },
     {
       "path": "tools/de_repo.py",
-      "bytes": 38266,
-      "sha256": "606341b0136f4d90a0f6044837e883ca7cb22502115d0266e53d98da5ed147a1"
+      "bytes": 40511,
+      "sha256": "9cd567bf7e1feb1b4df12973ba8f62f1244c8c11e5ab7425c5f06357d0120bbf"
     },
     {
       "path": "tools/de_workbench.py",
