@@ -88,6 +88,9 @@ def main() -> int:
     assert len(repo_contract.splitlines()) <= 60
     repo_brief = run_tool("de.py", "repo", "brief", "--root", str(repo_fixture))
     assert "Repo Brief" in repo_brief
+    repo_commands = assert_json(run_tool("de_repo.py", "commands", "--root", str(repo_fixture)))
+    assert 'de databricks sql execute --sql "SELECT 1" --dry-run-only' in repo_commands["databricks"]
+    assert "de-mssql policy-check" in repo_commands["mssql"]
     repo_interview = assert_json(run_tool("de.py", "repo", "interview", "--root", str(repo_fixture), "--format", "json", "--max-questions", "8"))
     assert repo_interview["status"] == "ok"
     assert repo_interview["question_count"] >= 5

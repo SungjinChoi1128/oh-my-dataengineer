@@ -28,9 +28,10 @@ de ado bulk preview --file bulk-updates.csv
 de ado query --wiql "SELECT [System.Id], [System.Title] FROM WorkItems"
 de demo pipeline-doctor
 de databricks bundle-doctor --bundle-yaml databricks.yml --pipeline-yaml azure-pipelines.yml
-de databricks sql execute --sql "SELECT 1"
+de databricks sql execute --sql "SELECT 1" --dry-run-only
 de databricks runtime-advisor --current-runtime 15.4 --target-runtime 16.4 --environment prod
 de mssql assess --metadata-file inventory.json
+de-mssql policy-check
 de mssql query --sql "SELECT TOP 10 * FROM dbo.Customers" --server localhost --database EDW
 de migration plan --objects-file object-map.json --source mssql --target databricks
 de security checklist --scope client-review
@@ -48,7 +49,7 @@ de release verify
 
 `de databricks bundle-doctor` and `de databricks runtime-advisor` add Databricks-specific readiness checks for Asset Bundles, ADO deploys, runtime upgrades, Unity Catalog naming discipline, and modern AI/serving/telemetry workloads.
 
-`de databricks sql execute`, `de ado query`, and `de mssql query` are guarded live paths. They use your installed Databricks CLI/profile, Azure CLI, or `sqlcmd` instead of replacing them.
+`de databricks sql execute`, `de ado query`, and `de mssql query` are guarded live paths. Start with dry-run/classify/policy checks, then use your installed Databricks CLI/profile, Azure CLI, or `sqlcmd` instead of replacing them.
 
 ## Output Modes
 
@@ -82,4 +83,4 @@ WSL/macOS/Linux-style shell:
 sh ./install-wsl.sh
 ```
 
-See `docs/user-manual.md`, `docs/repo-onboarding.md`, `docs/windows-11-install.md`, `docs/security-model.md`, `docs/workbench.md`, `docs/databricks.md`, `docs/pipeline-doctor.md`, and `docs/ux-guide.md`.
+See `docs/user-manual.md`, `docs/repo-onboarding.md`, `docs/windows-11-install.md`, `docs/security-model.md`, `docs/workbench.md`, `docs/databricks.md`, `docs/pipeline-doctor.md`, `docs/ux-guide.md`, and `docs/checkpoint-audit.md`.

@@ -2,12 +2,12 @@
   "name": "de-opencode",
   "version": "0.9.0",
   "layout": "opencode-config-dir",
-  "file_count": 53,
+  "file_count": 54,
   "files": [
     {
       "path": "README.md",
-      "bytes": 4637,
-      "sha256": "b12197fe5c1416f013313b26c472027367048286dd19023366ea94fdb0a629b4"
+      "bytes": 4745,
+      "sha256": "bcf9f672541572df91d6f2405b68e841a0558f8c88d095bbd143ea43771b83ca"
     },
     {
       "path": "VERSION",
@@ -28,6 +28,11 @@
       "path": "agents/data-engineer.md",
       "bytes": 3672,
       "sha256": "9aa247059f8ff945739d2990cda90f02ff9f32929f896d33cc0b459d3cd57870"
+    },
+    {
+      "path": "docs/checkpoint-audit.md",
+      "bytes": 3160,
+      "sha256": "791c09b9a8f13918627dc2bc39627aa6b1abbcc55a6a7e7bd5e87cf4d2c3691f"
     },
     {
       "path": "docs/client-faq.md",
@@ -196,13 +201,13 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 8785,
-      "sha256": "613189090c3a73f1bc0bbf6ba41c6b8e9c6c146902699da8c2fcc058e0bd2aa4"
+      "bytes": 9123,
+      "sha256": "028df5212f967a505bee9ec7ecd919ef7333a1ef0e8b5dbb6f82f35420111c99"
     },
     {
       "path": "tests/smoke.py",
-      "bytes": 12415,
-      "sha256": "48daf9ccd4efedda5e48016f49609361a63d8881f72713d7cf7137f06b0fc9e0"
+      "bytes": 12675,
+      "sha256": "deaaf1256b2c9b97a70d8944f894f475c606711790025bf46d4b3873cdcdb8af"
     },
     {
       "path": "tools/__init__.py",
@@ -261,8 +266,8 @@
     },
     {
       "path": "tools/de_repo.py",
-      "bytes": 32205,
-      "sha256": "505666769edcc84bc86b9ce6a9148832dfdde4c1b784ae0a051e610427f9eed8"
+      "bytes": 32257,
+      "sha256": "bc4b9c219346a13ecb1ee931e46c3b2f23c08bf65d3b040665637103fa1a0c66"
     },
     {
       "path": "tools/de_workbench.py",

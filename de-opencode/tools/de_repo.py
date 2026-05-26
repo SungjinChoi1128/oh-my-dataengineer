@@ -236,12 +236,13 @@ def command_catalog(signals: dict, important: dict[str, list[str]]) -> dict[str,
         bundle = important.get("databricks", ["databricks.yml"])[0] if important.get("databricks") else "databricks.yml"
         commands["databricks"] = [
             f"de databricks bundle-doctor --bundle-yaml {bundle}",
+            'de databricks sql execute --sql "SELECT 1" --dry-run-only',
             "de databricks sql warehouses",
-            'de databricks sql execute --sql "SELECT 1"',
         ]
     if signals.get("sql") or signals.get("mssql_or_tsql"):
         commands["mssql"] = [
             'de-mssql classify --sql "SELECT 1"',
+            'de-mssql policy-check',
             'de mssql query --sql "SELECT 1" --server <server> --database <db> --auth-mode integrated',
         ]
     if signals.get("tests"):
