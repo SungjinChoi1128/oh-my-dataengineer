@@ -6,7 +6,7 @@ INSTALL_ROOT="${1:-$HOME/.config/opencode}"
 BIN_DIR="${HOME}/.local/bin"
 
 mkdir -p "$INSTALL_ROOT" "$BIN_DIR"
-cp -R "$SOURCE_DIR/README.md" "$SOURCE_DIR/opencode.json" "$SOURCE_DIR/VERSION" "$SOURCE_DIR/install.ps1" "$SOURCE_DIR/install-wsl.sh" "$SOURCE_DIR/smoke.ps1" "$SOURCE_DIR/agents" "$SOURCE_DIR/skills" "$SOURCE_DIR/plugins" "$SOURCE_DIR/tools" "$SOURCE_DIR/docs" "$SOURCE_DIR/tests" "$SOURCE_DIR/samples" "$SOURCE_DIR/templates" "$INSTALL_ROOT/"
+cp -R "$SOURCE_DIR/README.md" "$SOURCE_DIR/opencode.json" "$SOURCE_DIR/VERSION" "$SOURCE_DIR/install.ps1" "$SOURCE_DIR/install-wsl.sh" "$SOURCE_DIR/smoke.ps1" "$SOURCE_DIR/agents" "$SOURCE_DIR/skills" "$SOURCE_DIR/plugins" "$SOURCE_DIR/commands" "$SOURCE_DIR/tools" "$SOURCE_DIR/docs" "$SOURCE_DIR/tests" "$SOURCE_DIR/samples" "$SOURCE_DIR/templates" "$INSTALL_ROOT/"
 if [ -f "$SOURCE_DIR/release-manifest.json" ]; then
   cp "$SOURCE_DIR/release-manifest.json" "$INSTALL_ROOT/"
 fi

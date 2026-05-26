@@ -19,7 +19,9 @@ de doctor
 de auth
 de repo init
 de repo reset
+de repo scope list
 de repo contract
+de repo map
 de repo brief
 de repo todo
 de workbench catalog
@@ -46,7 +48,7 @@ de release verify
 
 `de workbench` is the unified entry point for the package skill catalog and task triage.
 
-`de repo init` is the repo onboarding flow. It scans the current repo without reading secret files, writes `.de-opencode/repo-context.json`, compact `.de-opencode/DE.md`, `.de-opencode/repo-brief.md`, `.de-opencode/next-actions.md`, `.de-opencode/repo-interview.md`, `.de-opencode/commands.json`, and `.de-opencode/safety-policy.json`, then future agent sessions can use that context. `de repo refresh` rescans in place. `de repo reset` archives stale context and reinitializes it for shared integration repos or branch/feature switches. `de repo contract` prints the short data-engineering contract. `de repo todo` prints the short next-action list. `de repo interview` asks targeted follow-up questions only after initialization, based on what the scan found. `AGENTS.md` and `CLAUDE.md` export is opt-in via `de repo install-contract`; legacy `de repo install-agents-md` remains available.
+`de repo init` is the repo onboarding flow. It scans the current repo without reading secret files, writes `.de-opencode/repo-context.json`, compact `.de-opencode/DE.md`, `.de-opencode/repo-map.md`, `.de-opencode/repo-brief.md`, `.de-opencode/next-actions.md`, `.de-opencode/repo-interview.md`, `.de-opencode/commands.json`, and `.de-opencode/safety-policy.json`, then future agent sessions can use that context. `de repo scope` creates named path scopes for integration repos. `de repo refresh` rescans in place. `de repo reset` archives stale context and reinitializes it for shared integration repos or branch/feature switches. `de repo diff`, `de repo archives`, and `de repo restore` inspect and recover archived context. `de repo contract` prints the short data-engineering contract. `de repo map` prints the compact domain map. `de repo todo` prints the short next-action list. `de repo interview` asks targeted follow-up questions only after initialization, based on what the scan found. `AGENTS.md` and `CLAUDE.md` export is opt-in via `de repo install-contract`; legacy `de repo install-agents-md` remains available.
 
 `de pipeline doctor` is the primary CI/CD workflow. It preflights Azure Pipeline YAML, diagnoses build logs, explains blockers in plain language, suggests fixes, and writes evidence artifacts.
 

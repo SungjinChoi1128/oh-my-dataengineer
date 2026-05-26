@@ -30,7 +30,11 @@ def main() -> int:
     assert permissions["de_databricks_runtime_advisor"] == "allow"
     assert permissions["de_config_auth"] == "allow"
     assert permissions["de_repo_init"] == "allow"
+    assert permissions["de_repo_scope"] == "allow"
     assert permissions["de_repo_reset"] == "allow"
+    assert permissions["de_repo_map"] == "allow"
+    assert permissions["de_repo_archives"] == "allow"
+    assert permissions["de_repo_diff"] == "allow"
     assert permissions["de_repo_doctor"] == "allow"
     assert permissions["de_repo_brief"] == "allow"
     assert permissions["de_repo_contract"] == "allow"
@@ -61,6 +65,11 @@ def main() -> int:
     assert permissions["bash"]["de auth*"] == "allow"
     assert permissions["bash"]["de repo init*"] == "allow"
     assert permissions["bash"]["de repo reset*"] == "allow"
+    assert permissions["bash"]["de repo scope*"] == "allow"
+    assert permissions["bash"]["de repo map*"] == "allow"
+    assert permissions["bash"]["de repo archives*"] == "allow"
+    assert permissions["bash"]["de repo diff*"] == "allow"
+    assert permissions["bash"]["de repo restore*"] == "allow"
     assert permissions["bash"]["de repo contract*"] == "allow"
     assert permissions["bash"]["de repo todo*"] == "allow"
     assert permissions["bash"]["de repo interview*"] == "allow"
@@ -68,6 +77,11 @@ def main() -> int:
     assert permissions["bash"]["de repo install-contract*"] == "ask"
     assert permissions["bash"]["de-repo init*"] == "allow"
     assert permissions["bash"]["de-repo reset*"] == "allow"
+    assert permissions["bash"]["de-repo scope*"] == "allow"
+    assert permissions["bash"]["de-repo map*"] == "allow"
+    assert permissions["bash"]["de-repo archives*"] == "allow"
+    assert permissions["bash"]["de-repo diff*"] == "allow"
+    assert permissions["bash"]["de-repo restore*"] == "allow"
     assert permissions["bash"]["de-repo contract*"] == "allow"
     assert permissions["bash"]["de-repo todo*"] == "allow"
     assert permissions["bash"]["de-repo interview*"] == "allow"
@@ -87,7 +101,11 @@ def main() -> int:
         "de_config_doctor",
         "de_config_auth",
         "de_repo_init",
+        "de_repo_scope",
         "de_repo_reset",
+        "de_repo_map",
+        "de_repo_archives",
+        "de_repo_diff",
         "de_repo_doctor",
         "de_repo_brief",
         "de_repo_contract",
@@ -127,6 +145,10 @@ def main() -> int:
         assert risky in plugin
 
     assert (ROOT / "templates" / "azure-pipelines" / "databricks-bundle-ci.yml").exists()
+    assert (ROOT / "commands" / "de-onboard.md").exists()
+    assert (ROOT / "commands" / "de-reset-context.md").exists()
+    assert (ROOT / "commands" / "de-done.md").exists()
+    assert (ROOT / "commands" / "de-pipeline-fix.md").exists()
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.good.yml").exists()
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.bad.yml").exists()
     assert (ROOT / "samples" / "databricks-bundle" / "databricks.good.yml").exists()
@@ -158,6 +180,7 @@ def main() -> int:
     assert "What You Use It For" in read("docs/user-manual.md")
     assert "Repo Onboarding" in read("docs/user-manual.md")
     assert "de repo reset" in read("docs/repo-onboarding.md")
+    assert "de repo scope" in read("docs/repo-onboarding.md")
     assert "Compact DE.md" in read("docs/repo-onboarding.md")
     assert "Opt-In Agent Files" in read("docs/repo-onboarding.md")
     assert "Short Next Actions" in read("docs/repo-onboarding.md")
@@ -176,11 +199,13 @@ def main() -> int:
     assert '"de-workbench" = "de_workbench.py"' in read("install.ps1")
     assert '"de-repo" = "de_repo.py"' in read("install.ps1")
     assert '"README.md"' in read("install.ps1")
+    assert '"commands"' in read("install.ps1")
     assert 'databricks sql execute --sql "SELECT 1" --dry-run-only' in read("smoke.ps1")
     assert "ado query --help" in read("smoke.ps1")
     assert "mssql query --help" in read("smoke.ps1")
     assert "repo init --root" in read("smoke.ps1")
     assert "repo reset --root" in read("smoke.ps1")
+    assert "repo map --root" in read("smoke.ps1")
     assert "repo contract --root" in read("smoke.ps1")
     assert "repo todo --root" in read("smoke.ps1")
     assert "repo interview --root" in read("smoke.ps1")
@@ -190,6 +215,7 @@ def main() -> int:
     assert "write_wrapper de-workbench de_workbench.py" in read("install-wsl.sh")
     assert "write_wrapper de-repo de_repo.py" in read("install-wsl.sh")
     assert "$SOURCE_DIR/README.md" in read("install-wsl.sh")
+    assert '$SOURCE_DIR/commands' in read("install-wsl.sh")
 
     secret_scan = re.compile(
         "|".join([

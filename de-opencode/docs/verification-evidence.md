@@ -21,6 +21,11 @@ python3 de-opencode/tools/de.py auth
 python3 de-opencode/tools/de.py repo init --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py repo reset --root /private/tmp/de-opencode-repo-context-smoke --format json
 python3 de-opencode/tools/de_repo.py reset --root /private/tmp/de-opencode-force-reset-smoke --force --no-init
+python3 de-opencode/tools/de.py repo scope add --root /private/tmp/de-opencode-scope-smoke --name customer360 --path feature/sql --use --format json
+python3 de-opencode/tools/de.py repo map --root /private/tmp/de-opencode-scope-smoke --format json
+python3 de-opencode/tools/de.py repo archives --root /private/tmp/de-opencode-scope-smoke --format json
+python3 de-opencode/tools/de.py repo diff --root /private/tmp/de-opencode-scope-smoke --format json
+python3 de-opencode/tools/de.py repo restore --root /private/tmp/de-opencode-scope-smoke --archive latest --format json
 python3 de-opencode/tools/de.py repo doctor --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py repo contract --root /private/tmp/de-opencode-repo-context-smoke
 python3 de-opencode/tools/de.py repo brief --root /private/tmp/de-opencode-repo-context-smoke
@@ -50,6 +55,7 @@ env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de doctor
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de auth
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo init --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo reset --root /private/tmp/de-opencode-repo-context-smoke
+env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo map --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de-repo doctor --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo contract --root /private/tmp/de-opencode-repo-context-smoke
 env PATH=/private/tmp/de-opencode-home-workbench/.local/bin:$PATH de repo todo --root /private/tmp/de-opencode-repo-context-smoke
@@ -80,6 +86,8 @@ Results:
 - `de auth` reported `.env supported: False`, safe-default posture, and enterprise-ready status based on configured modern auth rather than mere absence of legacy secrets.
 - `de repo init`, `de repo reset`, `de repo doctor`, `de repo contract`, `de repo brief`, `de repo todo`, and `de repo interview` generated and read repo-local `.de-opencode` context artifacts without requiring secret files.
 - `de repo reset` archived stale context by default, reinitialized fresh context, and `de-repo reset --force --no-init` deleted generated context when explicitly requested.
+- `de repo scope`, `de repo map`, `de repo archives`, `de repo diff`, and `de repo restore` worked for scoped integration-repo context.
+- `de repo doctor` reported freshness warnings when generated context was made stale.
 - `de workbench catalog`, `de workbench capabilities`, and `de workbench triage` exposed all existing package skills and domain coverage through one front door.
 - `de ado refine` produced sprint/backlog refinement findings for missing acceptance criteria, child tasks, estimates, assignees, stale active work, and iteration gaps.
 - `de ado bulk preview` generated a non-mutating bulk update preview with approval required.

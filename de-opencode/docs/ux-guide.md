@@ -11,7 +11,9 @@ The final completion UX is `ready/needs-evidence/blocked`, exposed by `de done`.
 de doctor
 de auth
 de repo init
+de repo scope list
 de repo reset
+de repo map
 de repo contract
 de repo brief
 de repo todo

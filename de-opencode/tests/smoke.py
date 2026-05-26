@@ -79,6 +79,7 @@ def main() -> int:
     assert "databricks-bundle" in repo_init["summary"]["repo_types"]
     assert (repo_fixture / ".de-opencode" / "repo-context.json").exists()
     assert (repo_fixture / ".de-opencode" / "DE.md").exists()
+    assert (repo_fixture / ".de-opencode" / "repo-map.md").exists()
     assert (repo_fixture / ".de-opencode" / "next-actions.md").exists()
     assert (repo_fixture / ".de-opencode" / "repo-interview.md").exists()
     reset = assert_json(run_tool("de.py", "repo", "reset", "--root", str(repo_fixture), "--format", "json"))
@@ -96,8 +97,36 @@ def main() -> int:
     assert force_reset["reset"]["mode"] == "deleted"
     assert force_reset["reinitialized"] is False
     assert not (force_fixture / ".de-opencode").exists()
+    scope_fixture = Path(tempfile.gettempdir()) / "de-opencode-scope-smoke"
+    if scope_fixture.exists():
+        shutil.rmtree(scope_fixture)
+    (scope_fixture / "feature" / "sql").mkdir(parents=True)
+    (scope_fixture / "feature" / "sql" / "load_customer.sql").write_text("SELECT 1;\n", encoding="utf-8")
+    scope_add = assert_json(run_tool("de.py", "repo", "scope", "add", "--root", str(scope_fixture), "--name", "customer360", "--path", "feature/sql", "--use", "--format", "json"))
+    assert scope_add["active"] == "customer360"
+    scoped_init = assert_json(run_tool("de.py", "repo", "init", "--root", str(scope_fixture), "--format", "json"))
+    assert scoped_init["scope"] == "customer360"
+    assert (scope_fixture / ".de-opencode" / "scopes" / "customer360" / "repo-context.json").exists()
+    scoped_map = assert_json(run_tool("de.py", "repo", "map", "--root", str(scope_fixture), "--format", "json"))
+    assert scoped_map["scope"]["name"] == "customer360"
+    assert "feature/sql/load_customer.sql" in scoped_map["domains"]["sql"]
+    scoped_reset = assert_json(run_tool("de.py", "repo", "reset", "--root", str(scope_fixture), "--format", "json"))
+    assert scoped_reset["reset"]["mode"] == "archived"
+    archives = assert_json(run_tool("de.py", "repo", "archives", "--root", str(scope_fixture), "--format", "json"))
+    assert archives["archives"]
+    scoped_diff = assert_json(run_tool("de.py", "repo", "diff", "--root", str(scope_fixture), "--format", "json"))
+    assert scoped_diff["status"] == "ok"
+    scoped_restore = assert_json(run_tool("de.py", "repo", "restore", "--root", str(scope_fixture), "--archive", "latest", "--format", "json"))
+    assert scoped_restore["status"] == "ok"
     repo_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
     assert repo_doctor["status"] == "ok"
+    assert "warnings" in repo_doctor
+    context_path = repo_fixture / ".de-opencode" / "repo-context.json"
+    stale_context = json.loads(context_path.read_text(encoding="utf-8"))
+    stale_context["generated_at"] = "2000-01-01T00:00:00+00:00"
+    context_path.write_text(json.dumps(stale_context, indent=2), encoding="utf-8")
+    stale_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
+    assert stale_doctor["warnings"]
     repo_contract = run_tool("de.py", "repo", "contract", "--root", str(repo_fixture))
     assert "Compact data-engineering agent contract" in repo_contract
     assert "Evidence before done" in repo_contract

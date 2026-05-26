@@ -87,13 +87,38 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
         description: "Create safe repo-local de-opencode context artifacts for data-engineering onboarding.",
         args: {
           root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          scope: tool.schema.string().optional().describe("Optional named repo scope."),
           maxFiles: tool.schema.number().optional().describe("Maximum files to scan."),
         },
         async execute(args) {
           return runPython($, "de_repo.py", [
             "init",
             ...(args.root ? ["--root", args.root] : []),
+            ...(args.scope ? ["--scope", args.scope] : []),
             ...(args.maxFiles ? ["--max-files", String(args.maxFiles)] : []),
+          ])
+        },
+      }),
+      de_repo_scope: tool({
+        description: "Add, list, use, or show repo scopes for integration repos.",
+        args: {
+          action: tool.schema.string().describe("Action: list, current, add, use, or remove."),
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          name: tool.schema.string().optional().describe("Scope name for add/use/remove."),
+          path: tool.schema.string().optional().describe("Scope path for add. Use comma-separated paths for multiple."),
+          use: tool.schema.boolean().optional().describe("Set added scope active."),
+        },
+        async execute(args) {
+          const action = args.action || "list"
+          const paths = args.path ? String(args.path).split(",").map((item) => item.trim()).filter(Boolean) : []
+          return runPython($, "de_repo.py", [
+            "scope",
+            action,
+            ...(args.root ? ["--root", args.root] : []),
+            ...(args.name && action === "add" ? ["--name", args.name] : []),
+            ...(args.name && ["use", "remove"].includes(action) ? [args.name] : []),
+            ...paths.flatMap((item) => ["--path", item]),
+            ...(args.use ? ["--use"] : []),
           ])
         },
       }),
@@ -101,6 +126,7 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
         description: "Archive existing .de-opencode repo context and reinitialize it for integration repos or branch changes.",
         args: {
           root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          scope: tool.schema.string().optional().describe("Optional named repo scope."),
           maxFiles: tool.schema.number().optional().describe("Maximum files to scan after reset."),
           archiveDir: tool.schema.string().optional().describe("Optional archive parent directory. Defaults to .de-opencode-archive."),
           noInit: tool.schema.boolean().optional().describe("Only archive context; do not reinitialize."),
@@ -109,6 +135,7 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           return runPython($, "de_repo.py", [
             "reset",
             ...(args.root ? ["--root", args.root] : []),
+            ...(args.scope ? ["--scope", args.scope] : []),
             ...(args.maxFiles ? ["--max-files", String(args.maxFiles)] : []),
             ...(args.archiveDir ? ["--archive-dir", args.archiveDir] : []),
             ...(args.noInit ? ["--no-init"] : []),
@@ -119,9 +146,41 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
         description: "Check whether repo-local de-opencode context is initialized and healthy.",
         args: {
           root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          scope: tool.schema.string().optional().describe("Optional named repo scope."),
         },
         async execute(args) {
-          return runPython($, "de_repo.py", ["doctor", ...(args.root ? ["--root", args.root] : [])])
+          return runPython($, "de_repo.py", ["doctor", ...(args.root ? ["--root", args.root] : []), ...(args.scope ? ["--scope", args.scope] : [])])
+        },
+      }),
+      de_repo_map: tool({
+        description: "Read the compact data-engineering repo map for the active/global scope.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          scope: tool.schema.string().optional().describe("Optional named repo scope."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", ["map", "--format", "json", ...(args.root ? ["--root", args.root] : []), ...(args.scope ? ["--scope", args.scope] : [])])
+        },
+      }),
+      de_repo_archives: tool({
+        description: "List archived repo contexts created by de repo reset.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          scope: tool.schema.string().optional().describe("Optional named repo scope."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", ["archives", ...(args.root ? ["--root", args.root] : []), ...(args.scope ? ["--scope", args.scope] : [])])
+        },
+      }),
+      de_repo_diff: tool({
+        description: "Compare current repo context with an archived context.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+          scope: tool.schema.string().optional().describe("Optional named repo scope."),
+          archive: tool.schema.string().optional().describe("Archive name/path, or latest."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", ["diff", "--format", "json", "--archive", args.archive || "latest", ...(args.root ? ["--root", args.root] : []), ...(args.scope ? ["--scope", args.scope] : [])])
         },
       }),
       de_repo_brief: tool({

@@ -24,7 +24,7 @@ Write-Step "Target: $InstallRoot"
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 
-foreach ($name in @("README.md", "opencode.json", "VERSION", "release-manifest.json", "install.ps1", "install-wsl.sh", "smoke.ps1", "agents", "skills", "plugins", "tools", "docs", "tests", "samples", "templates")) {
+foreach ($name in @("README.md", "opencode.json", "VERSION", "release-manifest.json", "install.ps1", "install-wsl.sh", "smoke.ps1", "agents", "skills", "plugins", "commands", "tools", "docs", "tests", "samples", "templates")) {
   $src = Join-Path $SourceRoot $name
   $dst = Join-Path $InstallRoot $name
   if (Test-Path $src) {

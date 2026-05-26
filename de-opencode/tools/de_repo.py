@@ -17,6 +17,9 @@ from typing import Iterable, Optional
 
 
 CONTEXT_DIR = ".de-opencode"
+ARCHIVE_DIR = ".de-opencode-archive"
+SCOPES_FILE = "scopes.json"
+FRESHNESS_DAYS = 14
 SECRET_NAMES = {
     ".env",
     ".env.local",
@@ -31,7 +34,7 @@ IGNORE_DIRS = {
     ".svn",
     ".omx",
     ".de-opencode",
-    ".de-opencode-archive",
+    ARCHIVE_DIR,
     ".venv",
     "venv",
     "env",
@@ -56,24 +59,46 @@ def is_secret_path(path: Path) -> bool:
     return name in SECRET_NAMES or path.suffix.lower() in SECRET_SUFFIXES or "secret" in name and path.suffix.lower() in {".json", ".yml", ".yaml"}
 
 
-def iter_repo_files(root: Path, max_files: int) -> list[Path]:
+def iter_repo_files(root: Path, max_files: int, include_paths: Optional[list[str]] = None) -> list[Path]:
     files: list[Path] = []
-    for current, dirs, names in os.walk(root):
-        dirs[:] = [item for item in dirs if item not in IGNORE_DIRS and not item.startswith(".cache")]
-        current_path = Path(current)
-        for name in names:
-            path = current_path / name
-            if is_secret_path(path):
-                continue
-            try:
-                if path.stat().st_size > 2_000_000:
+    starts = scoped_start_paths(root, include_paths)
+    for start in starts:
+        if start.is_file():
+            if not is_secret_path(start):
+                files.append(start)
+            continue
+        if not start.exists():
+            continue
+        for current, dirs, names in os.walk(start):
+            dirs[:] = [item for item in dirs if item not in IGNORE_DIRS and not item.startswith(".cache")]
+            current_path = Path(current)
+            for name in names:
+                path = current_path / name
+                if is_secret_path(path):
                     continue
-            except OSError:
-                continue
-            files.append(path)
-            if len(files) >= max_files:
-                return files
+                try:
+                    if path.stat().st_size > 2_000_000:
+                        continue
+                except OSError:
+                    continue
+                files.append(path)
+                if len(files) >= max_files:
+                    return files
     return files
+
+
+def scoped_start_paths(root: Path, include_paths: Optional[list[str]]) -> list[Path]:
+    if not include_paths:
+        return [root]
+    starts = []
+    for item in include_paths:
+        path = (root / item).resolve()
+        try:
+            path.relative_to(root)
+        except ValueError:
+            continue
+        starts.append(path)
+    return starts or [root]
 
 
 def git_root(start: Path) -> Optional[Path]:
@@ -84,6 +109,21 @@ def git_root(start: Path) -> Optional[Path]:
     if result.returncode == 0 and result.stdout.strip():
         return Path(result.stdout.strip()).resolve()
     return None
+
+
+def git_value(root: Path, args: list[str]) -> str:
+    try:
+        result = subprocess.run(["git", "-C", str(root), *args], text=True, capture_output=True, timeout=5)
+    except Exception:
+        return ""
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def git_metadata(root: Path) -> dict:
+    return {
+        "branch": git_value(root, ["branch", "--show-current"]),
+        "commit": git_value(root, ["rev-parse", "--short", "HEAD"]),
+    }
 
 
 def detect_repo(root: Path, files: list[Path]) -> dict:
@@ -129,6 +169,7 @@ def detect_repo(root: Path, files: list[Path]) -> dict:
         "root": ".",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "platform": platform.platform(),
+        "git": git_metadata(root),
         "file_count_scanned": len(files),
         "file_suffix_counts": dict(sorted(suffixes.items(), key=lambda item: item[0])),
         "repo_types": repo_types,
@@ -519,13 +560,15 @@ def render_de_contract(context: dict) -> str:
     ]).rstrip()
 
 
-def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, str]:
-    target = root / CONTEXT_DIR
+def write_artifacts(root: Path, context: dict, target: Optional[Path] = None, force: bool = True) -> dict[str, str]:
+    target = target or root / CONTEXT_DIR
     target.mkdir(parents=True, exist_ok=True)
     paths = {
         "context": target / "repo-context.json",
         "brief": target / "repo-brief.md",
         "contract": target / "DE.md",
+        "map": target / "repo-map.md",
+        "map_json": target / "repo-map.json",
         "next_actions": target / "next-actions.md",
         "next_actions_json": target / "next-actions.json",
         "interview": target / "repo-interview.md",
@@ -536,6 +579,9 @@ def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, 
     paths["context"].write_text(json.dumps(context, indent=2) + "\n", encoding="utf-8")
     paths["brief"].write_text(render_brief(context) + "\n", encoding="utf-8")
     paths["contract"].write_text(render_de_contract(context) + "\n", encoding="utf-8")
+    repo_map = build_repo_map(context)
+    paths["map"].write_text(render_repo_map(repo_map) + "\n", encoding="utf-8")
+    paths["map_json"].write_text(json.dumps(repo_map, indent=2) + "\n", encoding="utf-8")
     paths["next_actions"].write_text(render_next_actions(context) + "\n", encoding="utf-8")
     paths["next_actions_json"].write_text(json.dumps(context["next_actions"], indent=2) + "\n", encoding="utf-8")
     paths["interview"].write_text(render_interview(context) + "\n", encoding="utf-8")
@@ -619,6 +665,54 @@ def render_next_actions(context: dict) -> str:
     return "\n".join(lines).rstrip()
 
 
+def build_repo_map(context: dict) -> dict:
+    important = context.get("important_files", {})
+    return {
+        "status": "ok",
+        "repo_name": context.get("repo_name"),
+        "scope": context.get("scope"),
+        "generated_at": context.get("generated_at"),
+        "repo_types": context.get("repo_types", []),
+        "domains": {
+            "pipelines": important.get("pipelines", []),
+            "databricks": important.get("databricks", []),
+            "sql": important.get("sql", []),
+            "notebooks": important.get("notebooks", []),
+            "tests": important.get("tests", []),
+            "config": important.get("config", []),
+        },
+        "risk_zones": context.get("risk_zones", [])[:30],
+        "recommended_commands": context.get("commands", {}),
+    }
+
+
+def render_repo_map(repo_map: dict) -> str:
+    scope = repo_map.get("scope") or {}
+    title = f"# DE Repo Map: {repo_map.get('repo_name', 'unknown')}"
+    if scope.get("name"):
+        title += f" ({scope['name']})"
+    lines = [title, "", f"Generated: {repo_map.get('generated_at', 'unknown')}", ""]
+    lines += ["## Domains", ""]
+    for domain, items in repo_map.get("domains", {}).items():
+        if not items:
+            continue
+        lines.append(f"### {domain.title()}")
+        lines.extend(f"- `{item}`" for item in items[:30])
+        lines.append("")
+    if repo_map.get("risk_zones"):
+        lines += ["## Risk Zones", ""]
+        for item in repo_map["risk_zones"]:
+            lines.append(f"- {item.get('severity', '').upper()}: `{item.get('path')}` ({item.get('id')})")
+        lines.append("")
+    if repo_map.get("recommended_commands"):
+        lines += ["## Commands", ""]
+        for group, commands in repo_map["recommended_commands"].items():
+            lines.append(f"### {group.title()}")
+            lines.extend(f"- `{command}`" for command in commands)
+            lines.append("")
+    return "\n".join(lines).rstrip()
+
+
 def render_interview(context: dict, max_questions: Optional[int] = None) -> str:
     interview = context.get("interview") or build_interview(context)
     questions = interview.get("questions", [])
@@ -645,8 +739,59 @@ def render_interview(context: dict, max_questions: Optional[int] = None) -> str:
     return "\n".join(lines).rstrip()
 
 
-def load_context(root: Path) -> Optional[dict]:
-    path = root / CONTEXT_DIR / "repo-context.json"
+def sanitize_scope_name(name: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9_.-]+", "-", name.strip()).strip(".-")
+    if not cleaned:
+        raise ValueError("scope name cannot be empty")
+    return cleaned[:80]
+
+
+def context_dir(root: Path, scope: Optional[str] = None) -> Path:
+    if scope:
+        return root / CONTEXT_DIR / "scopes" / sanitize_scope_name(scope)
+    return root / CONTEXT_DIR
+
+
+def scopes_path(root: Path) -> Path:
+    return root / CONTEXT_DIR / SCOPES_FILE
+
+
+def load_scopes(root: Path) -> dict:
+    path = scopes_path(root)
+    if not path.exists():
+        return {"status": "ok", "active": "", "scopes": {}}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {"status": "error", "active": "", "scopes": {}}
+    data.setdefault("active", "")
+    data.setdefault("scopes", {})
+    return data
+
+
+def save_scopes(root: Path, data: dict) -> None:
+    path = scopes_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def resolve_scope(root: Path, explicit: Optional[str], global_context: bool = False) -> Optional[str]:
+    if global_context:
+        return None
+    if explicit:
+        return sanitize_scope_name(explicit)
+    active = load_scopes(root).get("active", "")
+    return sanitize_scope_name(active) if active else None
+
+
+def scope_info(root: Path, scope: Optional[str]) -> Optional[dict]:
+    if not scope:
+        return None
+    return load_scopes(root).get("scopes", {}).get(scope)
+
+
+def load_context(root: Path, scope: Optional[str] = None) -> Optional[dict]:
+    path = context_dir(root, scope) / "repo-context.json"
     if not path.exists():
         return None
     try:
@@ -664,51 +809,104 @@ def resolve_root(value: Optional[str]) -> Path:
 
 def cmd_init(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    result = initialize_context(root, args.max_files)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    result = initialize_context(root, args.max_files, scope)
     print(json.dumps(result, indent=2))
     return 0
 
 
-def initialize_context(root: Path, max_files: int) -> dict:
-    files = iter_repo_files(root, max_files)
+def initialize_context(root: Path, max_files: int, scope: Optional[str] = None) -> dict:
+    info = scope_info(root, scope)
+    include_paths = info.get("paths", []) if info else None
+    files = iter_repo_files(root, max_files, include_paths)
     context = detect_repo(root, files)
+    if scope:
+        context["scope"] = {"name": scope, "paths": include_paths or []}
     context["interview"] = build_interview(context)
     context["next_actions"] = build_next_actions(context)
-    artifacts = write_artifacts(root, context)
-    return {"status": "ok", "root": str(root), "artifacts": artifacts, "summary": summary(context)}
+    artifacts = write_artifacts(root, context, context_dir(root, scope))
+    result = {"status": "ok", "root": str(root), "scope": scope or "", "artifacts": artifacts, "summary": summary(context)}
+    if scope and not info:
+        result["warnings"] = [f"Scope '{scope}' is not defined; scanned full repo. Use `de repo scope add --name {scope} --path <path>`."]
+    return result
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    base = context_dir(root, scope)
+    context = load_context(root, scope)
     issues = []
+    warnings = []
     if context is None:
         issues.append("Repo context not initialized. Run `de repo init`.")
     else:
-        for name in ("repo-brief.md", "DE.md", "next-actions.md", "next-actions.json", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
-            if not (root / CONTEXT_DIR / name).exists():
-                issues.append(f"Missing {CONTEXT_DIR}/{name}. Run `de repo refresh`.")
+        for name in ("repo-brief.md", "DE.md", "repo-map.md", "repo-map.json", "next-actions.md", "next-actions.json", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
+            if not (base / name).exists():
+                issues.append(f"Missing {rel(base / name, root)}. Run `de repo refresh`.")
+        warnings.extend(freshness_warnings(root, context))
     agents_md = root / "AGENTS.md"
     result = {
         "status": "ok" if not issues else "needs-init",
         "root": str(root),
+        "scope": scope or "",
         "issues": issues,
-        "context_dir": str(root / CONTEXT_DIR),
+        "warnings": warnings,
+        "context_dir": str(base),
         "agents_md_installed": agents_md.exists() and "de-opencode repo context" in agents_md.read_text(encoding="utf-8", errors="ignore"),
     }
     print(json.dumps(result, indent=2))
     return 1 if issues and args.strict else 0
 
 
+def freshness_warnings(root: Path, context: dict) -> list[str]:
+    warnings = []
+    generated = parse_dt(context.get("generated_at", ""))
+    if generated:
+        age_days = (datetime.now(timezone.utc) - generated).days
+        if age_days > FRESHNESS_DAYS:
+            warnings.append(f"Repo context is {age_days} days old; run `de repo refresh` or `de repo reset`.")
+    git = context.get("git", {})
+    current = git_metadata(root)
+    if git.get("branch") and current.get("branch") and git.get("branch") != current.get("branch"):
+        warnings.append(f"Git branch changed from {git.get('branch')} to {current.get('branch')}; consider `de repo reset`.")
+    if generated:
+        for group, paths in context.get("important_files", {}).items():
+            for item in paths[:20]:
+                path = root / item
+                try:
+                    modified = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+                except OSError:
+                    continue
+                if modified > generated:
+                    warnings.append(f"Important {group} file changed after context init: {item}")
+                    return warnings
+    return warnings
+
+
+def parse_dt(value: str) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
 def cmd_reset(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context_dir = root / CONTEXT_DIR
-    reset_result = reset_context_dir(root, context_dir, args.force, args.archive_dir)
-    init_result = None if args.no_init else initialize_context(root, args.max_files)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    base = context_dir(root, scope)
+    reset_result = reset_context_dir(root, base, args.force, args.archive_dir, scope)
+    init_result = None if args.no_init else initialize_context(root, args.max_files, scope)
     result = {
         "status": "ok",
         "root": str(root),
-        "context_dir": str(context_dir),
+        "scope": scope or "",
+        "context_dir": str(base),
         "reset": reset_result,
         "reinitialized": init_result is not None,
     }
@@ -719,13 +917,14 @@ def cmd_reset(args: argparse.Namespace) -> int:
     return 0
 
 
-def reset_context_dir(root: Path, context_dir: Path, force: bool, archive_dir: Optional[str]) -> dict:
-    if not context_dir.exists():
-        return {"mode": "none", "message": ".de-opencode did not exist; nothing to remove"}
+def reset_context_dir(root: Path, base: Path, force: bool, archive_dir: Optional[str], scope: Optional[str] = None) -> dict:
+    label = rel(base, root)
+    if not base.exists():
+        return {"mode": "none", "message": f"{label} did not exist; nothing to remove"}
     if force:
-        shutil.rmtree(context_dir)
-        return {"mode": "deleted", "path": str(context_dir)}
-    archive_root = Path(archive_dir).resolve() if archive_dir else root / ".de-opencode-archive"
+        shutil.rmtree(base)
+        return {"mode": "deleted", "path": str(base), "scope": scope or ""}
+    archive_root = Path(archive_dir).resolve() if archive_dir else root / ARCHIVE_DIR / (scope or "global")
     archive_root.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     target = archive_root / f"de-opencode-{stamp}"
@@ -733,13 +932,14 @@ def reset_context_dir(root: Path, context_dir: Path, force: bool, archive_dir: O
     while target.exists():
         suffix += 1
         target = archive_root / f"de-opencode-{stamp}-{suffix}"
-    shutil.move(str(context_dir), str(target))
-    return {"mode": "archived", "path": str(target)}
+    shutil.move(str(base), str(target))
+    return {"mode": "archived", "path": str(target), "scope": scope or ""}
 
 
 def cmd_brief(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print("Repo context not initialized. Run `de repo init`.")
         return 1
@@ -753,7 +953,8 @@ def cmd_brief(args: argparse.Namespace) -> int:
 
 def cmd_json_artifact(args: argparse.Namespace, key: str) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init`."}, indent=2))
         return 1
@@ -763,7 +964,8 @@ def cmd_json_artifact(args: argparse.Namespace, key: str) -> int:
 
 def cmd_interview(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before interviewing the user."}, indent=2))
         return 1
@@ -776,6 +978,7 @@ def cmd_interview(args: argparse.Namespace) -> int:
     data = {
         "status": "ok",
         "root": str(root),
+        "scope": scope or "",
         "question_count": len(questions),
         "instructions": context["interview"].get("instructions", ""),
         "questions": questions,
@@ -789,7 +992,8 @@ def cmd_interview(args: argparse.Namespace) -> int:
 
 def cmd_todo(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before generating repo next actions."}, indent=2))
         return 1
@@ -798,6 +1002,7 @@ def cmd_todo(args: argparse.Namespace) -> int:
     data = {
         "status": "ok",
         "root": str(root),
+        "scope": scope or "",
         "action_count": len(context["next_actions"].get("actions", [])),
         "actions": context["next_actions"].get("actions", []),
     }
@@ -810,7 +1015,8 @@ def cmd_todo(args: argparse.Namespace) -> int:
 
 def cmd_contract(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before generating the data-engineering contract."}, indent=2))
         return 1
@@ -819,7 +1025,8 @@ def cmd_contract(args: argparse.Namespace) -> int:
         print(json.dumps({
             "status": "ok",
             "root": str(root),
-            "path": f"{CONTEXT_DIR}/DE.md",
+            "scope": scope or "",
+            "path": rel(context_dir(root, scope) / "DE.md", root),
             "line_count": len(text.splitlines()),
             "contract": text,
         }, indent=2))
@@ -828,9 +1035,194 @@ def cmd_contract(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_map(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
+    if context is None:
+        print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before generating the repo map."}, indent=2))
+        return 1
+    repo_map = build_repo_map(context)
+    if args.format == "json":
+        print(json.dumps(repo_map, indent=2))
+    else:
+        print(render_repo_map(repo_map))
+    return 0
+
+
+def cmd_scope(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    data = load_scopes(root)
+    if args.scope_command == "add":
+        name = sanitize_scope_name(args.name)
+        paths = []
+        for item in args.path:
+            path = (root / item).resolve()
+            try:
+                paths.append(rel(path, root))
+            except ValueError:
+                print(json.dumps({"status": "blocked", "message": f"Scope path must stay inside repo root: {item}"}, indent=2))
+                return 1
+        data["scopes"][name] = {
+            "name": name,
+            "paths": paths,
+            "created_at": data.get("scopes", {}).get(name, {}).get("created_at") or datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if args.use or not data.get("active"):
+            data["active"] = name
+        save_scopes(root, data)
+        print(json.dumps({"status": "ok", "root": str(root), "active": data.get("active", ""), "scope": data["scopes"][name]}, indent=2))
+        return 0
+    if args.scope_command == "list":
+        print(json.dumps({"status": "ok", "root": str(root), "active": data.get("active", ""), "scopes": list(data.get("scopes", {}).values())}, indent=2))
+        return 0
+    if args.scope_command == "use":
+        name = sanitize_scope_name(args.name)
+        if name not in data.get("scopes", {}):
+            print(json.dumps({"status": "missing", "message": f"Scope '{name}' is not defined."}, indent=2))
+            return 1
+        data["active"] = name
+        save_scopes(root, data)
+        print(json.dumps({"status": "ok", "active": name, "scope": data["scopes"][name]}, indent=2))
+        return 0
+    if args.scope_command == "current":
+        active = data.get("active", "")
+        print(json.dumps({"status": "ok", "active": active, "scope": data.get("scopes", {}).get(active, {}) if active else {}}, indent=2))
+        return 0
+    if args.scope_command == "remove":
+        name = sanitize_scope_name(args.name)
+        removed = data.get("scopes", {}).pop(name, None)
+        if data.get("active") == name:
+            data["active"] = ""
+        save_scopes(root, data)
+        print(json.dumps({"status": "ok" if removed else "missing", "removed": bool(removed), "scope": name}, indent=2))
+        return 0 if removed else 1
+    raise AssertionError(f"Unhandled scope command: {args.scope_command}")
+
+
+def cmd_archives(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    archives = list_archives(root, getattr(args, "scope", None))
+    print(json.dumps({"status": "ok", "root": str(root), "archives": archives}, indent=2))
+    return 0
+
+
+def list_archives(root: Path, scope: Optional[str] = None) -> list[dict]:
+    base = root / ARCHIVE_DIR
+    if scope:
+        base = base / sanitize_scope_name(scope)
+    if not base.exists():
+        return []
+    archives = []
+    for path in sorted(base.rglob("repo-context.json"), reverse=True):
+        archive = path.parent
+        context = load_json_file(path)
+        archives.append({
+            "name": archive.name,
+            "path": str(archive),
+            "scope": context.get("scope", {}).get("name", ""),
+            "generated_at": context.get("generated_at", ""),
+            "repo_types": context.get("repo_types", []),
+        })
+    return archives
+
+
+def cmd_restore(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    archive = resolve_archive(root, args.archive, scope)
+    if not archive:
+        print(json.dumps({"status": "missing", "message": "Archive not found."}, indent=2))
+        return 1
+    base = context_dir(root, scope)
+    backup = reset_context_dir(root, base, False, None, scope) if base.exists() else {"mode": "none"}
+    base.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(archive, base, dirs_exist_ok=True)
+    print(json.dumps({"status": "ok", "root": str(root), "scope": scope or "", "restored_from": str(archive), "previous_context": backup}, indent=2))
+    return 0
+
+
+def resolve_archive(root: Path, value: str, scope: Optional[str]) -> Optional[Path]:
+    if value == "latest":
+        archives = list_archives(root, scope)
+        return Path(archives[0]["path"]) if archives else None
+    path = Path(value)
+    if path.exists():
+        return path
+    for item in list_archives(root, scope):
+        if item["name"] == value:
+            return Path(item["path"])
+    return None
+
+
+def cmd_diff(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    current = load_context(root, scope)
+    archive_path = resolve_archive(root, args.archive, scope)
+    archived = load_json_file(archive_path / "repo-context.json") if archive_path else {}
+    if not current or not archived:
+        print(json.dumps({"status": "missing", "message": "Current context or archive context is missing."}, indent=2))
+        return 1
+    diff = context_diff(archived, current)
+    if args.format == "json":
+        print(json.dumps(diff, indent=2))
+    else:
+        print(render_context_diff(diff))
+    return 0
+
+
+def load_json_file(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def context_diff(old: dict, new: dict) -> dict:
+    return {
+        "status": "ok",
+        "old_generated_at": old.get("generated_at", ""),
+        "new_generated_at": new.get("generated_at", ""),
+        "repo_types": diff_lists(old.get("repo_types", []), new.get("repo_types", [])),
+        "signals": diff_lists(active_signal_names(old), active_signal_names(new)),
+        "risk_zones": diff_lists([item.get("path", "") for item in old.get("risk_zones", [])], [item.get("path", "") for item in new.get("risk_zones", [])]),
+        "important_files": {
+            key: diff_lists(old.get("important_files", {}).get(key, []), new.get("important_files", {}).get(key, []))
+            for key in sorted(set(old.get("important_files", {})) | set(new.get("important_files", {})))
+        },
+    }
+
+
+def active_signal_names(context: dict) -> list[str]:
+    return sorted(key for key, value in context.get("signals", {}).items() if value)
+
+
+def diff_lists(old: list[str], new: list[str]) -> dict:
+    return {"added": sorted(set(new) - set(old)), "removed": sorted(set(old) - set(new)), "unchanged_count": len(set(old) & set(new))}
+
+
+def render_context_diff(diff: dict) -> str:
+    lines = ["# Repo Context Diff", "", f"Old: {diff.get('old_generated_at')}", f"New: {diff.get('new_generated_at')}", ""]
+    for title, key in [("Repo Types", "repo_types"), ("Signals", "signals"), ("Risk Zones", "risk_zones")]:
+        item = diff.get(key, {})
+        lines += [f"## {title}", ""]
+        lines += [f"- added: {', '.join(item.get('added', [])) or 'none'}", f"- removed: {', '.join(item.get('removed', [])) or 'none'}", ""]
+    lines += ["## Important Files", ""]
+    for group, item in diff.get("important_files", {}).items():
+        if item.get("added") or item.get("removed"):
+            lines.append(f"### {group}")
+            lines.append(f"- added: {', '.join(item.get('added', [])) or 'none'}")
+            lines.append(f"- removed: {', '.join(item.get('removed', [])) or 'none'}")
+            lines.append("")
+    return "\n".join(lines).rstrip()
+
+
 def cmd_install_contract(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init` first."}, indent=2))
         return 1
@@ -849,7 +1241,8 @@ def cmd_install_contract(args: argparse.Namespace) -> int:
 
 def cmd_install_agents_md(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
-    context = load_context(root)
+    scope = resolve_scope(root, getattr(args, "scope", None), getattr(args, "global_context", False))
+    context = load_context(root, scope)
     if context is None:
         print(json.dumps({"status": "needs-init", "message": "Run `de repo init` first."}, indent=2))
         return 1
@@ -909,16 +1302,23 @@ def build_parser() -> argparse.ArgumentParser:
     def add_root(target: argparse.ArgumentParser) -> None:
         target.add_argument("--root", help="Repo root; defaults to current git root or cwd")
 
+    def add_scope(target: argparse.ArgumentParser) -> None:
+        target.add_argument("--scope", help="Named repo scope; defaults to active scope when set")
+        target.add_argument("--global-context", action="store_true", help="Ignore active scope and use global repo context")
+
     init = sub.add_parser("init", help="Create .de-opencode repo context artifacts")
     add_root(init)
+    add_scope(init)
     init.add_argument("--max-files", type=int, default=2000)
     init.set_defaults(func=cmd_init)
     refresh = sub.add_parser("refresh", help="Refresh .de-opencode repo context artifacts")
     add_root(refresh)
+    add_scope(refresh)
     refresh.add_argument("--max-files", type=int, default=2000)
     refresh.set_defaults(func=cmd_init)
     reset = sub.add_parser("reset", help="Archive or delete .de-opencode and reinitialize repo context")
     add_root(reset)
+    add_scope(reset)
     reset.add_argument("--max-files", type=int, default=2000)
     reset.add_argument("--archive-dir", help="Archive parent directory; defaults to .de-opencode-archive")
     reset.add_argument("--force", action="store_true", help="Delete .de-opencode instead of archiving it")
@@ -926,37 +1326,88 @@ def build_parser() -> argparse.ArgumentParser:
     reset.set_defaults(func=cmd_reset)
     doctor = sub.add_parser("doctor", help="Check repo context health")
     add_root(doctor)
+    add_scope(doctor)
     doctor.add_argument("--strict", action="store_true")
     doctor.set_defaults(func=cmd_doctor)
     brief = sub.add_parser("brief", help="Print repo brief")
     add_root(brief)
+    add_scope(brief)
     brief.add_argument("--format", choices=["markdown", "json"], default="markdown")
     brief.set_defaults(func=cmd_brief)
     contract = sub.add_parser("contract", help="Print compact data-engineering agent contract")
     add_root(contract)
+    add_scope(contract)
     contract.add_argument("--format", choices=["markdown", "json"], default="markdown")
     contract.set_defaults(func=cmd_contract)
+    repo_map = sub.add_parser("map", help="Print compact data-engineering repo map")
+    add_root(repo_map)
+    add_scope(repo_map)
+    repo_map.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    repo_map.set_defaults(func=cmd_map)
     todo = sub.add_parser("todo", help="Print short repo-specific next actions")
     add_root(todo)
+    add_scope(todo)
     todo.add_argument("--format", choices=["markdown", "json"], default="markdown")
     todo.set_defaults(func=cmd_todo)
     interview = sub.add_parser("interview", help="Print initialized repo-specific user interview questions")
     add_root(interview)
+    add_scope(interview)
     interview.add_argument("--format", choices=["markdown", "json"], default="markdown")
     interview.add_argument("--max-questions", type=int, default=0)
     interview.set_defaults(func=cmd_interview)
     commands = sub.add_parser("commands", help="Print detected repo commands")
     add_root(commands)
+    add_scope(commands)
     commands.set_defaults(func=lambda args: cmd_json_artifact(args, "commands"))
     policy = sub.add_parser("policy", help="Print detected repo safety policy")
     add_root(policy)
+    add_scope(policy)
     policy.set_defaults(func=lambda args: cmd_json_artifact(args, "safety_policy"))
+    scope = sub.add_parser("scope", help="Manage named repo scopes for integration repos")
+    scope_sub = scope.add_subparsers(dest="scope_command", required=True)
+    scope_add = scope_sub.add_parser("add", help="Add or update a named repo scope")
+    add_root(scope_add)
+    scope_add.add_argument("--name", required=True)
+    scope_add.add_argument("--path", action="append", required=True)
+    scope_add.add_argument("--use", action="store_true")
+    scope_add.set_defaults(func=cmd_scope)
+    scope_list = scope_sub.add_parser("list", help="List repo scopes")
+    add_root(scope_list)
+    scope_list.set_defaults(func=cmd_scope)
+    scope_use = scope_sub.add_parser("use", help="Set active repo scope")
+    add_root(scope_use)
+    scope_use.add_argument("name")
+    scope_use.set_defaults(func=cmd_scope)
+    scope_current = scope_sub.add_parser("current", help="Show active repo scope")
+    add_root(scope_current)
+    scope_current.set_defaults(func=cmd_scope)
+    scope_remove = scope_sub.add_parser("remove", help="Remove a repo scope definition")
+    add_root(scope_remove)
+    scope_remove.add_argument("name")
+    scope_remove.set_defaults(func=cmd_scope)
+    archives = sub.add_parser("archives", help="List archived repo contexts")
+    add_root(archives)
+    archives.add_argument("--scope")
+    archives.set_defaults(func=cmd_archives)
+    restore = sub.add_parser("restore", help="Restore an archived repo context")
+    add_root(restore)
+    add_scope(restore)
+    restore.add_argument("--archive", default="latest")
+    restore.set_defaults(func=cmd_restore)
+    diff = sub.add_parser("diff", help="Compare current repo context with an archive")
+    add_root(diff)
+    add_scope(diff)
+    diff.add_argument("--archive", default="latest")
+    diff.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    diff.set_defaults(func=cmd_diff)
     agents = sub.add_parser("install-agents-md", help="Opt-in AGENTS.md generation from repo context")
     add_root(agents)
+    add_scope(agents)
     agents.add_argument("--force", action="store_true")
     agents.set_defaults(func=cmd_install_agents_md)
     install_contract = sub.add_parser("install-contract", help="Opt-in export of the compact DE contract to AGENTS.md or CLAUDE.md")
     add_root(install_contract)
+    add_scope(install_contract)
     install_contract.add_argument("--target", choices=["agents", "claude"], default="agents")
     install_contract.add_argument("--force", action="store_true")
     install_contract.set_defaults(func=cmd_install_contract)

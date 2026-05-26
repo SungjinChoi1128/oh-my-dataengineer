@@ -16,6 +16,7 @@ The agent should run:
 de repo doctor
 de repo init
 de repo contract
+de repo map
 de repo brief
 de repo todo
 de repo interview
@@ -36,6 +37,7 @@ de repo commands
 de repo policy
 de repo refresh
 de repo reset
+de repo scope list
 ```
 
 `de repo init` writes:
@@ -43,6 +45,8 @@ de repo reset
 ```text
 .de-opencode/repo-context.json
 .de-opencode/DE.md
+.de-opencode/repo-map.md
+.de-opencode/repo-map.json
 .de-opencode/repo-brief.md
 .de-opencode/next-actions.md
 .de-opencode/next-actions.json
@@ -53,6 +57,19 @@ de repo reset
 ```
 
 These files are reviewable. They contain detected repo shape, a compact data-engineering contract, short next actions, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
+
+## Integration Repo Scopes
+
+Use scopes when one integration repo contains many feature areas or multiple users are working in unrelated paths:
+
+```bash
+de repo scope add --name customer360 --path src/customer360 --path pipelines/customer360 --use
+de repo init
+de repo map
+de repo reset
+```
+
+Scoped context lives under `.de-opencode/scopes/<name>/`. The active scope is stored in `.de-opencode/scopes.json`, so later `de repo init`, `de repo reset`, `de repo doctor`, `de repo brief`, `de repo map`, `de repo todo`, and `de repo interview` use that scope by default. Use `--global-context` when you intentionally want whole-repo context.
 
 ## Refresh vs Reset
 
@@ -77,6 +94,16 @@ Use `--no-init` when you only want to clear or archive context and leave the rep
 de repo reset --no-init
 ```
 
+Use archive inspection and diff when you want to understand what changed:
+
+```bash
+de repo archives
+de repo diff --archive latest
+de repo restore --archive latest
+```
+
+`de repo doctor` warns when context is old, the git branch changed, or important files changed after context generation.
+
 ## Compact DE.md
 
 `.de-opencode/DE.md` is the small always-safe contract inspired by `CLAUDE.md`, but tailored to data engineering. It should stay short: operating principles, environment discipline, SQL safety, pipeline safety, Databricks safety, and evidence-before-done.
@@ -85,6 +112,7 @@ Use:
 
 ```bash
 de repo contract
+de repo map
 ```
 
 Do not turn `DE.md` into a full handbook. Detailed repo facts belong in `repo-brief.md`, command details in `commands.json`, and approval rules in `safety-policy.json`.

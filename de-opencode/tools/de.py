@@ -580,6 +580,10 @@ def render_repo_text(title: str, data: Dict) -> str:
         return "\n".join([title, "", *[f"- {rule}" for rule in data.get("rules", [])]])
     if data.get("root"):
         lines.append(f"- root: {data['root']}")
+    if "scope" in data:
+        lines.append(f"- scope: {data.get('scope') or 'global'}")
+    if data.get("active"):
+        lines.append(f"- active scope: {data['active']}")
     summary_data = data.get("summary", {})
     if summary_data:
         lines.append("- repo types: " + ", ".join(summary_data.get("repo_types", [])))
@@ -596,6 +600,17 @@ def render_repo_text(title: str, data: Dict) -> str:
     if data.get("issues"):
         lines += ["", "Issues:"]
         lines += [f"- {issue}" for issue in data["issues"]]
+    if data.get("warnings"):
+        lines += ["", "Warnings:"]
+        lines += [f"- {warning}" for warning in data["warnings"]]
+    if data.get("archives"):
+        lines += ["", "Archives:"]
+        for item in data["archives"][:10]:
+            lines.append(f"- {item.get('name')} ({item.get('scope') or 'global'}): {item.get('path')}")
+    if data.get("reset"):
+        lines += ["", "Reset:"]
+        for key, value in data["reset"].items():
+            lines.append(f"- {key}: {value}")
     if "agents_md_installed" in data:
         lines.append(f"- AGENTS.md installed: {data['agents_md_installed']}")
     return "\n".join(lines)
@@ -603,8 +618,14 @@ def render_repo_text(title: str, data: Dict) -> str:
 
 def cmd_repo_proxy(args: argparse.Namespace) -> int:
     tool_args = [args.repo_command]
+    if getattr(args, "scope_command", None):
+        tool_args.append(args.scope_command)
     if getattr(args, "root", None):
         tool_args += ["--root", args.root]
+    if getattr(args, "scope", None) and args.repo_command not in {"scope"}:
+        tool_args += ["--scope", args.scope]
+    if getattr(args, "global_context", False):
+        tool_args.append("--global-context")
     if getattr(args, "max_files", None):
         tool_args += ["--max-files", str(args.max_files)]
     if getattr(args, "strict", False):
@@ -617,12 +638,23 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         tool_args += ["--archive-dir", args.archive_dir]
     if getattr(args, "target", None):
         tool_args += ["--target", args.target]
-    if args.repo_command in {"brief", "contract", "interview", "todo"} and args.format == "json":
+    if getattr(args, "name", None):
+        if args.repo_command == "scope" and getattr(args, "scope_command", "") == "use":
+            tool_args.append(args.name)
+        elif args.repo_command == "scope":
+            tool_args += ["--name", args.name]
+    for path in getattr(args, "path", None) or []:
+        tool_args += ["--path", path]
+    if getattr(args, "use", False):
+        tool_args.append("--use")
+    if getattr(args, "archive", None):
+        tool_args += ["--archive", args.archive]
+    if args.repo_command in {"brief", "contract", "interview", "todo", "map", "diff"} and args.format == "json":
         tool_args += ["--format", "json"]
     if args.repo_command == "interview" and getattr(args, "max_questions", None):
         tool_args += ["--max-questions", str(args.max_questions)]
     code, data, stderr = run_tool("de_repo.py", tool_args, expect_failure=True)
-    if args.repo_command in {"brief", "contract", "interview", "todo"} and args.format != "json":
+    if args.repo_command in {"brief", "contract", "interview", "todo", "map", "diff"} and args.format != "json":
         text = data.get("raw_stdout", "")
         if text:
             print(text, end="" if text.endswith("\n") else "\n")
@@ -632,6 +664,11 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         "refresh": "Repo Refresh",
         "reset": "Repo Reset",
         "doctor": "Repo Doctor",
+        "scope": "Repo Scope",
+        "archives": "Repo Archives",
+        "restore": "Repo Restore",
+        "diff": "Repo Diff",
+        "map": "Repo Map",
         "commands": "Repo Commands",
         "contract": "Repo Contract",
         "todo": "Repo Todo",
@@ -701,15 +738,22 @@ def build_parser() -> argparse.ArgumentParser:
         ("doctor", "Check repo context health"),
         ("brief", "Print repo brief"),
         ("contract", "Print compact data-engineering agent contract"),
+        ("map", "Print compact data-engineering repo map"),
         ("todo", "Print short repo-specific next actions"),
         ("interview", "Print initialized repo-specific user interview questions"),
         ("commands", "Print detected repo commands"),
         ("policy", "Print detected repo safety policy"),
+        ("archives", "List archived repo contexts"),
+        ("restore", "Restore archived repo context"),
+        ("diff", "Compare current repo context with an archive"),
         ("install-agents-md", "Opt-in AGENTS.md generation from repo context"),
         ("install-contract", "Opt-in export of compact DE contract to AGENTS.md or CLAUDE.md"),
     ]:
         item = repo_sub.add_parser(name, help=help_text)
         item.add_argument("--root")
+        if name not in {"archives"}:
+            item.add_argument("--scope")
+            item.add_argument("--global-context", action="store_true")
         if name in {"init", "refresh", "reset"}:
             item.add_argument("--max-files", type=int, default=2000)
         if name == "reset":
@@ -723,8 +767,39 @@ def build_parser() -> argparse.ArgumentParser:
             item.add_argument("--target", choices=["agents", "claude"], default="agents")
         if name in {"install-agents-md", "install-contract", "reset"}:
             item.add_argument("--force", action="store_true")
+        if name in {"restore", "diff"}:
+            item.add_argument("--archive", default="latest")
+        if name == "archives":
+            item.add_argument("--scope")
         add_format_arg(item)
         item.set_defaults(func=cmd_repo_proxy)
+    scope = repo_sub.add_parser("scope", help="Manage named repo scopes")
+    scope_sub = scope.add_subparsers(dest="scope_command", required=True)
+    scope_add = scope_sub.add_parser("add", help="Add or update a named repo scope")
+    scope_add.add_argument("--root")
+    scope_add.add_argument("--name", required=True)
+    scope_add.add_argument("--path", action="append", required=True)
+    scope_add.add_argument("--use", action="store_true")
+    add_format_arg(scope_add)
+    scope_add.set_defaults(func=cmd_repo_proxy, repo_command="scope")
+    scope_list = scope_sub.add_parser("list", help="List repo scopes")
+    scope_list.add_argument("--root")
+    add_format_arg(scope_list)
+    scope_list.set_defaults(func=cmd_repo_proxy, repo_command="scope")
+    scope_use = scope_sub.add_parser("use", help="Set active repo scope")
+    scope_use.add_argument("name")
+    scope_use.add_argument("--root")
+    add_format_arg(scope_use)
+    scope_use.set_defaults(func=cmd_repo_proxy, repo_command="scope")
+    scope_current = scope_sub.add_parser("current", help="Show active repo scope")
+    scope_current.add_argument("--root")
+    add_format_arg(scope_current)
+    scope_current.set_defaults(func=cmd_repo_proxy, repo_command="scope")
+    scope_remove = scope_sub.add_parser("remove", help="Remove a repo scope definition")
+    scope_remove.add_argument("name")
+    scope_remove.add_argument("--root")
+    add_format_arg(scope_remove)
+    scope_remove.set_defaults(func=cmd_repo_proxy, repo_command="scope")
 
     workbench = sub.add_parser("workbench", help="Unified data-engineering skill workbench")
     workbench_sub = workbench.add_subparsers(dest="workbench_command", required=True)

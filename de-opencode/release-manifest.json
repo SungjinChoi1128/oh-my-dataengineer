@@ -2,12 +2,12 @@
   "name": "de-opencode",
   "version": "0.9.0",
   "layout": "opencode-config-dir",
-  "file_count": 54,
+  "file_count": 58,
   "files": [
     {
       "path": "README.md",
-      "bytes": 5332,
-      "sha256": "129311b610d31ffddb54ae4a3e17d18668a6eccd73dd4ab525163b5c27d7ea64"
+      "bytes": 5597,
+      "sha256": "4d3c327fa08e42364367e4a54baaf40bfa79b289406529093f8784704fe9169d"
     },
     {
       "path": "VERSION",
@@ -16,18 +16,38 @@
     },
     {
       "path": "agents/data-architect.md",
-      "bytes": 1424,
-      "sha256": "c74cc4f6dfeb6b17f96b93794d3d5c8262ab48c3407ab0b0ecfe69118904806d"
+      "bytes": 1533,
+      "sha256": "97a0a6529aaa6b0539a9fa5635bd7ea272473b541d57484115bf09bca6ab78bf"
     },
     {
       "path": "agents/data-devops.md",
-      "bytes": 1541,
-      "sha256": "c056ea85e6faeb5488b47c1062c2fdad0156d3059ecc451912572e03bb74e711"
+      "bytes": 1641,
+      "sha256": "c135a1a49e55ed572e4bca392fa455b9f842ab9437dd0c7c7d726eb04c620180"
     },
     {
       "path": "agents/data-engineer.md",
-      "bytes": 4251,
-      "sha256": "e875947787286f133603af434b0ecf26c639dbc92abd1caed7147b756c0f3db6"
+      "bytes": 4743,
+      "sha256": "603df224fa16eea683d3f5d8651d7054eb70a4c2f853a18b3f08678eee6b538d"
+    },
+    {
+      "path": "commands/de-done.md",
+      "bytes": 346,
+      "sha256": "e02f14f728e3db2d40e399463fe8857a14114926d72ed998b6570405737cfc2d"
+    },
+    {
+      "path": "commands/de-onboard.md",
+      "bytes": 463,
+      "sha256": "2b33839546dc6dc4314d08cfe75fe9c27dee3bbc1e9f835ecf25c3cb162fd2c3"
+    },
+    {
+      "path": "commands/de-pipeline-fix.md",
+      "bytes": 437,
+      "sha256": "a3a035b10ebb4fb2dce14264d1366a7f6466da069c5561ff7104a1ab1bfe48ad"
+    },
+    {
+      "path": "commands/de-reset-context.md",
+      "bytes": 457,
+      "sha256": "22ff5fb2a8e3dd7fdf92be193acde834f1a91c44e231fb6c6f0ed42118ddad60"
     },
     {
       "path": "docs/checkpoint-audit.md",
@@ -56,8 +76,8 @@
     },
     {
       "path": "docs/repo-onboarding.md",
-      "bytes": 4673,
-      "sha256": "6a5901d0f66c852a0fb9906c6175814477dc791513c34328b9c2f95857ec90ae"
+      "bytes": 5696,
+      "sha256": "8dc049dcb6049fc251df9750cdd37a3884dac4856f8f43be2d05a4201e4ecbf9"
     },
     {
       "path": "docs/security-model.md",
@@ -66,18 +86,18 @@
     },
     {
       "path": "docs/user-manual.md",
-      "bytes": 16834,
-      "sha256": "2f6158dc95de282e7f74f52d5b4a0b2e258dbdda05cf59d4ab92847d13203b1d"
+      "bytes": 17423,
+      "sha256": "445815bc99381deaa6974b42684a027ed9352c45ab1f48e4889d28458315d10b"
     },
     {
       "path": "docs/ux-guide.md",
-      "bytes": 2039,
-      "sha256": "3ecf705c3129311a7d441ec8bcfb6eaae764aec433b2994c3b0a9953dee0e6dd"
+      "bytes": 2070,
+      "sha256": "e8343c5fcc1a519d77adea1b1a04af6e9a6dac265ebfdff42fd7a64cb96f2e76"
     },
     {
       "path": "docs/verification-evidence.md",
-      "bytes": 10561,
-      "sha256": "3b5e04e39db39690ccc54a12ceaeb52655240e0fd4a009d96c72c9f8195b107d"
+      "bytes": 11484,
+      "sha256": "0017462a7353c1824b90a61ce148c53d415436ea61d53669201dd4347206e25d"
     },
     {
       "path": "docs/windows-11-install.md",
@@ -91,23 +111,23 @@
     },
     {
       "path": "install-wsl.sh",
-      "bytes": 1578,
-      "sha256": "fdf7e2ff0805d31aa7ad03516d80911e69e6cd95aff1d8ec9a67369a52fe9f89"
+      "bytes": 1601,
+      "sha256": "ac8d8610d15a244273a277b41d75195ed19af0b1892d3fa99e3bd8c98bee6b89"
     },
     {
       "path": "install.ps1",
-      "bytes": 3160,
-      "sha256": "538b1f1580b00d1684ea393b6effc19523914a9c233cee5e382198a1926f01ec"
+      "bytes": 3172,
+      "sha256": "ac5d5e840d5b816c2272e1defa4058b495c917856a0ba3829f8d67cc161249c3"
     },
     {
       "path": "opencode.json",
-      "bytes": 8372,
-      "sha256": "c650c5a0fabe3b8d42bdff95494b20c32e84b5c7238d22deff605ded7966ac16"
+      "bytes": 9042,
+      "sha256": "83931a30af7126441055d23e1a7b2b7a9ea982dd6bf39e0dd5ace229fa53db01"
     },
     {
       "path": "plugins/de-guardrails.ts",
-      "bytes": 24314,
-      "sha256": "2b77dd09874327f3afa71113ca29e4ab0a1038c85a7704c8f533265d438c8f18"
+      "bytes": 27828,
+      "sha256": "38d60e05705f1f96ba17a1b2f06f0b0937dad65a12bbb781d5990632f40715c7"
     },
     {
       "path": "samples/ado-pipeline/azure-pipelines.bad.yml",
@@ -191,8 +211,8 @@
     },
     {
       "path": "smoke.ps1",
-      "bytes": 3934,
-      "sha256": "a6af0e6df281f7957ca38fda8ebd0c666c7023d7ec7e639a9ffb45e2fe61d9c5"
+      "bytes": 4047,
+      "sha256": "9a5796ee9b850b48e6d3e412e3c0dc8c2b98bc03a810252de4ec5177b83154a3"
     },
     {
       "path": "templates/azure-pipelines/databricks-bundle-ci.yml",
@@ -201,13 +221,13 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 10302,
-      "sha256": "262837963f3b656b50258825531d3fb0a2f37309fb31444f03f7f581119fb4cd"
+      "bytes": 11669,
+      "sha256": "508ee10000980bb037051504e73f8fca0a2b0cb8b91429395a991a00ea7b113d"
     },
     {
       "path": "tests/smoke.py",
-      "bytes": 15318,
-      "sha256": "a9d1f7852974eb23ad6ae84f65ad9693633eaea955552e1a08458cfe030a1cdb"
+      "bytes": 17579,
+      "sha256": "71f3a262cf8c672b368dc9ed4c2d925c8a94bdeacdb9c43bfcfbbfb56addbd22"
     },
     {
       "path": "tools/__init__.py",
@@ -216,8 +236,8 @@
     },
     {
       "path": "tools/de.py",
-      "bytes": 43142,
-      "sha256": "2797b188d7aa54a1dfefdfcde0420cf1ddd9825534053d39c2d47efcad85b310"
+      "bytes": 46870,
+      "sha256": "b4d04f187825254818cc7e4a30f58732e14e7d247096e2db668b58323699f30b"
     },
     {
       "path": "tools/de_ado.py",
@@ -266,8 +286,8 @@
     },
     {
       "path": "tools/de_repo.py",
-      "bytes": 40511,
-      "sha256": "9cd567bf7e1feb1b4df12973ba8f62f1244c8c11e5ab7425c5f06357d0120bbf"
+      "bytes": 59997,
+      "sha256": "e45b14ab671696813f09a3dd62ff0ca2b43d8c94f922b693ec993b06944d9953"
     },
     {
       "path": "tools/de_workbench.py",
