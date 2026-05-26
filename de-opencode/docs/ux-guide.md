@@ -10,6 +10,7 @@ Use focused low-level commands such as `de-pipeline`, `de-quality`, and `de-conf
 de doctor
 de auth
 de repo init
+de repo contract
 de repo brief
 de repo interview
 de workbench catalog

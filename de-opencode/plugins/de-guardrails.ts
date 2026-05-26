@@ -115,6 +115,15 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           return runPython($, "de_repo.py", ["brief", ...(args.root ? ["--root", args.root] : [])])
         },
       }),
+      de_repo_contract: tool({
+        description: "Read the compact generated data-engineering agent contract after repo context is initialized.",
+        args: {
+          root: tool.schema.string().optional().describe("Optional repo root. Defaults to current working repo."),
+        },
+        async execute(args) {
+          return runPython($, "de_repo.py", ["contract", ...(args.root ? ["--root", args.root] : [])])
+        },
+      }),
       de_repo_interview: tool({
         description: "Generate targeted repo-specific interview questions after repo context is initialized.",
         args: {

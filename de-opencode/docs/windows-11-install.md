@@ -25,6 +25,7 @@ de-config doctor
 de doctor
 de auth
 de repo init
+de repo contract
 de repo brief
 de repo interview
 de workbench catalog

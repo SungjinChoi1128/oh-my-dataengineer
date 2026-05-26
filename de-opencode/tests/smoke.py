@@ -78,9 +78,14 @@ def main() -> int:
     assert repo_init["status"] == "ok"
     assert "databricks-bundle" in repo_init["summary"]["repo_types"]
     assert (repo_fixture / ".de-opencode" / "repo-context.json").exists()
+    assert (repo_fixture / ".de-opencode" / "DE.md").exists()
     assert (repo_fixture / ".de-opencode" / "repo-interview.md").exists()
     repo_doctor = assert_json(run_tool("de.py", "repo", "doctor", "--root", str(repo_fixture), "--format", "json"))
     assert repo_doctor["status"] == "ok"
+    repo_contract = run_tool("de.py", "repo", "contract", "--root", str(repo_fixture))
+    assert "Compact data-engineering agent contract" in repo_contract
+    assert "Evidence before done" in repo_contract
+    assert len(repo_contract.splitlines()) <= 60
     repo_brief = run_tool("de.py", "repo", "brief", "--root", str(repo_fixture))
     assert "Repo Brief" in repo_brief
     repo_interview = assert_json(run_tool("de.py", "repo", "interview", "--root", str(repo_fixture), "--format", "json", "--max-questions", "8"))
@@ -91,6 +96,13 @@ def main() -> int:
     assert agents["status"] == "ok"
     agents_blocked = assert_json(run_tool("de_repo.py", "install-agents-md", "--root", str(repo_fixture), expect=1))
     assert agents_blocked["status"] == "blocked"
+    claude_target = repo_fixture / "CLAUDE.md"
+    contract_export = assert_json(run_tool("de_repo.py", "install-contract", "--root", str(repo_fixture), "--target", "claude"))
+    assert contract_export["status"] == "ok"
+    assert claude_target.exists()
+    assert "Compact data-engineering agent contract" in claude_target.read_text(encoding="utf-8")
+    contract_blocked = assert_json(run_tool("de_repo.py", "install-contract", "--root", str(repo_fixture), "--target", "claude", expect=1))
+    assert contract_blocked["status"] == "blocked"
 
     dbsql = assert_json(run_tool("de_dbsql.py", "classify", "--sql", "SELECT 1"))
     assert dbsql["category"] == "readonly"

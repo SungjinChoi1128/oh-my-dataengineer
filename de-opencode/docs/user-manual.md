@@ -135,6 +135,7 @@ The `data-engineer` agent should run:
 ```bash
 de repo doctor
 de repo init
+de repo contract
 de repo brief
 de repo interview
 ```
@@ -143,6 +144,7 @@ The generated context lives in:
 
 ```text
 .de-opencode/repo-context.json
+.de-opencode/DE.md
 .de-opencode/repo-brief.md
 .de-opencode/repo-interview.md
 .de-opencode/commands.json
@@ -152,18 +154,22 @@ The generated context lives in:
 Use:
 
 ```bash
+de repo contract
 de repo interview
 de repo commands
 de repo policy
 de repo refresh
 ```
 
+`de repo contract` prints compact `.de-opencode/DE.md`: the small data-engineering operating contract for the repo. Keep it short; put detailed facts in `repo-brief.md`.
+
 `de repo interview` only works after initialization. It turns detected repo facts into targeted questions, such as safe default environment, ADO project/sprint defaults, Databricks bundle targets, SQL execution boundaries, and required handoff evidence.
 
-`AGENTS.md` is opt-in because OpenCode auto-loads it:
+`AGENTS.md` and `CLAUDE.md` export is opt-in because agent tools auto-load those files:
 
 ```bash
-de repo install-agents-md
+de repo install-contract --target agents
+de repo install-contract --target claude
 ```
 
 The scanner skips `.env`, `.databrickscfg`, ODBC config, PEM/key files, obvious secret JSON/YAML files, and very large files.

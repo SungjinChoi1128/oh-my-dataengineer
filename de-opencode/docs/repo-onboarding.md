@@ -15,17 +15,19 @@ The agent should run:
 ```bash
 de repo doctor
 de repo init
+de repo contract
 de repo brief
 de repo interview
 ```
 
-If repo context already exists, it should use `de repo brief`, `de repo interview`, and `de repo commands` instead of rescanning immediately.
+If repo context already exists, it should use `de repo contract`, `de repo brief`, `de repo interview`, and `de repo commands` instead of rescanning immediately.
 
 ## CLI UX
 
 ```bash
 de repo init
 de repo doctor
+de repo contract
 de repo brief
 de repo interview
 de repo commands
@@ -37,6 +39,7 @@ de repo refresh
 
 ```text
 .de-opencode/repo-context.json
+.de-opencode/DE.md
 .de-opencode/repo-brief.md
 .de-opencode/repo-interview.md
 .de-opencode/repo-interview.json
@@ -44,7 +47,19 @@ de repo refresh
 .de-opencode/safety-policy.json
 ```
 
-These files are reviewable. They contain detected repo shape, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
+These files are reviewable. They contain detected repo shape, a compact data-engineering contract, important files, risk zones, recommended commands, targeted interview questions, and safety policy.
+
+## Compact DE.md
+
+`.de-opencode/DE.md` is the small always-safe contract inspired by `CLAUDE.md`, but tailored to data engineering. It should stay short: operating principles, environment discipline, SQL safety, pipeline safety, Databricks safety, and evidence-before-done.
+
+Use:
+
+```bash
+de repo contract
+```
+
+Do not turn `DE.md` into a full handbook. Detailed repo facts belong in `repo-brief.md`, command details in `commands.json`, and approval rules in `safety-policy.json`.
 
 ## Initialized-Only Interview
 
@@ -58,17 +73,18 @@ The questions are generated from detected signals:
 - Missing tests: the evidence command or manual proof expected for this repo.
 - Risk zones: which detected deploy, SQL, notebook, or production-looking files are truly sensitive.
 
-## Opt-In AGENTS.md
+## Opt-In Agent Files
 
-OpenCode automatically loads `AGENTS.md`, so the package does not create or overwrite it during normal onboarding.
+OpenCode automatically loads `AGENTS.md`, and Claude Code can load `CLAUDE.md`, so the package does not create or overwrite either during normal onboarding.
 
 Use this only when you want repo-level agent instructions:
 
 ```bash
-de repo install-agents-md
+de repo install-contract --target agents
+de repo install-contract --target claude
 ```
 
-If `AGENTS.md` already exists, the command blocks unless `--force` is used.
+If the target file already exists, the command blocks unless `--force` is used.
 
 ## What It Detects
 

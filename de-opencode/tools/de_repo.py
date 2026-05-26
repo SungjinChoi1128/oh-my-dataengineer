@@ -380,12 +380,58 @@ def build_interview(context: dict) -> dict:
     }
 
 
+def render_de_contract(context: dict) -> str:
+    repo_types = ", ".join(context.get("repo_types", ["unknown"]))
+    signals = [key for key, value in context.get("signals", {}).items() if value]
+    signal_text = ", ".join(sorted(signals)) if signals else "none detected"
+    commands = []
+    for group, items in context.get("commands", {}).items():
+        commands.extend(items[:2])
+    command_lines = [f"- `{command}`" for command in commands[:8]] or ["- `de repo brief`"]
+    return "\n".join([
+        "# DE.md",
+        "",
+        "Compact data-engineering agent contract for this repository.",
+        "",
+        "## Repo Snapshot",
+        "",
+        f"- Repo: {context.get('repo_name', 'unknown')}",
+        f"- Types: {repo_types}",
+        f"- Signals: {signal_text}",
+        "- Detailed context lives in `.de-opencode/repo-brief.md`; read it only when needed.",
+        "",
+        "## Operating Principles",
+        "",
+        "1. Think before touching data: identify system, environment, target data, auth mode, and blast radius before live action.",
+        "2. Simplicity first: make the smallest safe change; do not add speculative abstractions, migrations, retries, or pipeline rewrites.",
+        "3. Surgical changes: touch only files tied to the request; do not refactor unrelated SQL, notebooks, bundles, or pipeline code.",
+        "4. Environment discipline: never assume dev, test, staging, or prod; ask when unclear and block risky live actions without approval.",
+        "5. SQL safety: classify SQL before execution; read-only first; mutations need environment, approval, row-count/schema evidence, and rollback thinking.",
+        "6. Pipeline safety: preflight YAML before rerun; diagnose logs before changing pipeline code; deploy/rerun only through approved commands.",
+        "7. Databricks safety: validate bundles before deploy/run; prefer profile/OAuth/WIF auth; respect Unity Catalog boundaries.",
+        "8. Evidence before done: report commands run, environment, result, evidence files, remaining risk, and what was not tested.",
+        "",
+        "## Safety Rules",
+        "",
+        "- Do not read `.env`, `.databrickscfg`, ODBC config, PEM/key files, or local secret stores.",
+        "- Do not expose secrets, full connection strings, PATs, bearer tokens, client hostnames, or raw production data samples.",
+        "- Use `de repo interview` only after repo context exists and only for high-value unresolved questions.",
+        "- Use `de repo refresh` after major repo structure or pipeline changes.",
+        "",
+        "## Preferred Commands",
+        "",
+        *command_lines,
+        "",
+    ]).rstrip()
+
+
 def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, str]:
     target = root / CONTEXT_DIR
     target.mkdir(parents=True, exist_ok=True)
     paths = {
         "context": target / "repo-context.json",
         "brief": target / "repo-brief.md",
+        "contract": target / "DE.md",
         "interview": target / "repo-interview.md",
         "interview_json": target / "repo-interview.json",
         "commands": target / "commands.json",
@@ -393,6 +439,7 @@ def write_artifacts(root: Path, context: dict, force: bool = True) -> dict[str, 
     }
     paths["context"].write_text(json.dumps(context, indent=2) + "\n", encoding="utf-8")
     paths["brief"].write_text(render_brief(context) + "\n", encoding="utf-8")
+    paths["contract"].write_text(render_de_contract(context) + "\n", encoding="utf-8")
     paths["interview"].write_text(render_interview(context) + "\n", encoding="utf-8")
     paths["interview_json"].write_text(json.dumps(context["interview"], indent=2) + "\n", encoding="utf-8")
     paths["commands"].write_text(json.dumps(context["commands"], indent=2) + "\n", encoding="utf-8")
@@ -509,7 +556,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     if context is None:
         issues.append("Repo context not initialized. Run `de repo init`.")
     else:
-        for name in ("repo-brief.md", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
+        for name in ("repo-brief.md", "DE.md", "repo-interview.md", "repo-interview.json", "commands.json", "safety-policy.json"):
             if not (root / CONTEXT_DIR / name).exists():
                 issues.append(f"Missing {CONTEXT_DIR}/{name}. Run `de repo refresh`.")
     agents_md = root / "AGENTS.md"
@@ -574,6 +621,45 @@ def cmd_interview(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_contract(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    context = load_context(root)
+    if context is None:
+        print(json.dumps({"status": "needs-init", "message": "Run `de repo init` before generating the data-engineering contract."}, indent=2))
+        return 1
+    text = render_de_contract(context)
+    if args.format == "json":
+        print(json.dumps({
+            "status": "ok",
+            "root": str(root),
+            "path": f"{CONTEXT_DIR}/DE.md",
+            "line_count": len(text.splitlines()),
+            "contract": text,
+        }, indent=2))
+    else:
+        print(text)
+    return 0
+
+
+def cmd_install_contract(args: argparse.Namespace) -> int:
+    root = resolve_root(args.root)
+    context = load_context(root)
+    if context is None:
+        print(json.dumps({"status": "needs-init", "message": "Run `de repo init` first."}, indent=2))
+        return 1
+    target_name = "CLAUDE.md" if args.target == "claude" else "AGENTS.md"
+    target = root / target_name
+    if target.exists() and not args.force:
+        print(json.dumps({"status": "blocked", "message": f"{target_name} already exists. Use --force to overwrite or edit manually."}, indent=2))
+        return 1
+    text = render_de_contract(context)
+    if args.target == "agents":
+        text = render_agents_md(context, contract=text)
+    target.write_text(text + "\n", encoding="utf-8")
+    print(json.dumps({"status": "ok", "path": target_name}, indent=2))
+    return 0
+
+
 def cmd_install_agents_md(args: argparse.Namespace) -> int:
     root = resolve_root(args.root)
     context = load_context(root)
@@ -589,17 +675,23 @@ def cmd_install_agents_md(args: argparse.Namespace) -> int:
     return 0
 
 
-def render_agents_md(context: dict) -> str:
+def render_agents_md(context: dict, contract: Optional[str] = None) -> str:
     commands = []
     for group, items in context["commands"].items():
         commands.extend(items[:3])
+    contract_text = contract or render_de_contract(context)
     return "\n".join([
         "# AGENTS.md",
         "",
         "This repository uses de-opencode repo context.",
         "",
+        "## Data Engineering Contract",
+        "",
+        contract_text,
+        "",
         "Before making data-engineering changes:",
         "",
+        "- Follow the data-engineering contract above.",
         "- Read `.de-opencode/repo-brief.md`.",
         "- Use `.de-opencode/safety-policy.json` for approval and secret-handling rules.",
         "- Prefer `de repo doctor`, `de repo brief`, and the recommended commands below.",
@@ -619,7 +711,7 @@ def summary(context: dict) -> dict:
         "repo_types": context["repo_types"],
         "signals": {key: value for key, value in context["signals"].items() if value},
         "risk_count": len(context["risk_zones"]),
-        "next_commands": ["de repo brief", "de repo interview", "de repo doctor", "de repo commands"],
+        "next_commands": ["de repo contract", "de repo brief", "de repo interview", "de repo doctor", "de repo commands"],
     }
 
 
@@ -646,6 +738,10 @@ def build_parser() -> argparse.ArgumentParser:
     add_root(brief)
     brief.add_argument("--format", choices=["markdown", "json"], default="markdown")
     brief.set_defaults(func=cmd_brief)
+    contract = sub.add_parser("contract", help="Print compact data-engineering agent contract")
+    add_root(contract)
+    contract.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    contract.set_defaults(func=cmd_contract)
     interview = sub.add_parser("interview", help="Print initialized repo-specific user interview questions")
     add_root(interview)
     interview.add_argument("--format", choices=["markdown", "json"], default="markdown")
@@ -661,6 +757,11 @@ def build_parser() -> argparse.ArgumentParser:
     add_root(agents)
     agents.add_argument("--force", action="store_true")
     agents.set_defaults(func=cmd_install_agents_md)
+    install_contract = sub.add_parser("install-contract", help="Opt-in export of the compact DE contract to AGENTS.md or CLAUDE.md")
+    add_root(install_contract)
+    install_contract.add_argument("--target", choices=["agents", "claude"], default="agents")
+    install_contract.add_argument("--force", action="store_true")
+    install_contract.set_defaults(func=cmd_install_contract)
     return parser
 
 

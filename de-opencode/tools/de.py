@@ -573,12 +573,14 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         tool_args.append("--strict")
     if getattr(args, "force", False):
         tool_args.append("--force")
-    if args.repo_command in {"brief", "interview"} and args.format == "json":
+    if getattr(args, "target", None):
+        tool_args += ["--target", args.target]
+    if args.repo_command in {"brief", "contract", "interview"} and args.format == "json":
         tool_args += ["--format", "json"]
     if args.repo_command == "interview" and getattr(args, "max_questions", None):
         tool_args += ["--max-questions", str(args.max_questions)]
     code, data, stderr = run_tool("de_repo.py", tool_args, expect_failure=True)
-    if args.repo_command in {"brief", "interview"} and args.format != "json":
+    if args.repo_command in {"brief", "contract", "interview"} and args.format != "json":
         text = data.get("raw_stdout", "")
         if text:
             print(text, end="" if text.endswith("\n") else "\n")
@@ -588,9 +590,11 @@ def cmd_repo_proxy(args: argparse.Namespace) -> int:
         "refresh": "Repo Refresh",
         "doctor": "Repo Doctor",
         "commands": "Repo Commands",
+        "contract": "Repo Contract",
         "interview": "Repo Interview",
         "policy": "Repo Policy",
         "install-agents-md": "Repo AGENTS.md Install",
+        "install-contract": "Repo Contract Install",
     }.get(args.repo_command, "Repo")
     text = render_repo_text(title, data)
     markdown = f"# {title}\n\n```text\n{text}\n```\n"
@@ -628,10 +632,12 @@ def build_parser() -> argparse.ArgumentParser:
         ("refresh", "Refresh .de-opencode repo context artifacts"),
         ("doctor", "Check repo context health"),
         ("brief", "Print repo brief"),
+        ("contract", "Print compact data-engineering agent contract"),
         ("interview", "Print initialized repo-specific user interview questions"),
         ("commands", "Print detected repo commands"),
         ("policy", "Print detected repo safety policy"),
         ("install-agents-md", "Opt-in AGENTS.md generation from repo context"),
+        ("install-contract", "Opt-in export of compact DE contract to AGENTS.md or CLAUDE.md"),
     ]:
         item = repo_sub.add_parser(name, help=help_text)
         item.add_argument("--root")
@@ -641,7 +647,9 @@ def build_parser() -> argparse.ArgumentParser:
             item.add_argument("--strict", action="store_true")
         if name == "interview":
             item.add_argument("--max-questions", type=int, default=0)
-        if name == "install-agents-md":
+        if name == "install-contract":
+            item.add_argument("--target", choices=["agents", "claude"], default="agents")
+        if name in {"install-agents-md", "install-contract"}:
             item.add_argument("--force", action="store_true")
         add_format_arg(item)
         item.set_defaults(func=cmd_repo_proxy)
