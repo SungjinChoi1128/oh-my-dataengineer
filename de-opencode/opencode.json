@@ -14,7 +14,7 @@
     "list": "allow",
     "grep": "allow",
     "glob": "allow",
-    "edit": "ask",
+    "edit": "allow",
     "external_directory": "ask",
     "webfetch": "ask",
     "websearch": "ask",
@@ -172,6 +172,7 @@
       "description": "Default data engineering agent for ADO, Databricks, MSSQL, CI/CD, migration, and QA-gated implementation work.",
       "steps": 24,
       "permission": {
+        "edit": "allow",
         "task": {
           "*": "deny",
           "data-architect": "ask",
@@ -225,7 +226,7 @@
       "description": "CI/CD specialist for Azure Pipelines, Databricks bundles, release evidence, and deployment troubleshooting.",
       "steps": 16,
       "permission": {
-        "edit": "ask",
+        "edit": "allow",
         "task": "deny",
         "bash": {
           "*": "ask",

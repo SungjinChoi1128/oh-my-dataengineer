@@ -10,7 +10,7 @@ This package is safe-by-default scaffolding for enterprise data-engineering work
 - SQL and pipeline operations are classified before execution.
 - Production deploys and data mutations require explicit approval.
 - Secret-provider commands are never invoked by `doctor`; explicit resolve commands can invoke them without printing secret values.
-- OpenCode permissions deny secret-file reads and ask-gate raw deployment, SQL, and pipeline mutation commands.
+- OpenCode permissions deny secret-file reads, allow normal code edits for the primary implementation flow, and ask-gate raw deployment, SQL, and pipeline mutation commands.
 - Subagent task delegation is limited to the architecture and DevOps lanes and is ask-gated.
 
 ## Preferred Auth
@@ -26,7 +26,7 @@ The agent package should not store client secrets and should not read `.env` fil
 
 ## Control Layers
 
-1. OpenCode permissions block or ask-gate risky tools.
+1. OpenCode permissions allow code edits while blocking or ask-gating risky tools.
 2. `de-guardrails.ts` blocks secret-file reads and risky raw bash commands.
 3. Plugin custom tools expose safer structured entry points.
 4. Python facades classify and dry-run sensitive actions before live execution.

@@ -23,6 +23,7 @@ def main() -> int:
     assert permissions["read"]["*.env"] == "deny"
     assert permissions["read"]["*.env.*"] == "deny"
     assert permissions["read"][".databrickscfg"] == "deny"
+    assert permissions["edit"] == "allow"
     assert permissions["task"]["*"] == "deny"
     assert permissions["task"]["data-architect"] == "ask"
     assert permissions["task"]["data-devops"] == "ask"
@@ -91,7 +92,10 @@ def main() -> int:
 
     agent = config["agent"]["data-engineer"]
     assert agent["steps"] <= 24
+    assert agent["permission"]["edit"] == "allow"
     assert agent["permission"]["task"]["*"] == "deny"
+    assert config["agent"]["data-architect"]["permission"]["edit"] == "deny"
+    assert config["agent"]["data-devops"]["permission"]["edit"] == "allow"
     assert config["agent"]["data-devops"]["permission"]["bash"]["de databricks bundle-doctor *"] == "allow"
 
     plugin = read("plugins/de-guardrails.ts")
@@ -149,6 +153,9 @@ def main() -> int:
     assert (ROOT / "commands" / "de-reset-context.md").exists()
     assert (ROOT / "commands" / "de-done.md").exists()
     assert (ROOT / "commands" / "de-pipeline-fix.md").exists()
+    assert "edit: allow" in read("agents/data-engineer.md")
+    assert "edit: allow" in read("agents/data-devops.md")
+    assert "edit: deny" in read("agents/data-architect.md")
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.good.yml").exists()
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.bad.yml").exists()
     assert (ROOT / "samples" / "databricks-bundle" / "databricks.good.yml").exists()

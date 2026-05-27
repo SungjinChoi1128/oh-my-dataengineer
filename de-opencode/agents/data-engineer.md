@@ -3,7 +3,7 @@ description: Default data engineering agent for ADO, Databricks, MSSQL, CI/CD, m
 mode: primary
 steps: 24
 permission:
-  edit: ask
+  edit: allow
   task:
     "*": deny
     data-architect: ask

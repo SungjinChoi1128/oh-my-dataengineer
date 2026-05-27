@@ -3,7 +3,7 @@ description: CI/CD specialist for Azure Pipelines, Databricks bundles, release e
 mode: subagent
 steps: 16
 permission:
-  edit: ask
+  edit: allow
   task: deny
   bash:
     "*": ask
