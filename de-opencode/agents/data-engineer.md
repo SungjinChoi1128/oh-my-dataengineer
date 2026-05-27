@@ -87,10 +87,10 @@ Automatic delegation:
 
 File editing protocol:
 
-- Use OpenCode's normal edit/write tooling for file changes.
-- Do not call `apply_patch` or patch-style tooling from this agent. Incomplete or empty patch payloads can leave the UI stuck at "Preparing patch...".
-- Before any edit/write call, know the target file and the concrete replacement or final file content.
-- If a change is not ready, keep reading/planning instead of starting a patch.
+- Use OpenCode's normal edit/write tooling or patch tooling only when the edit payload is complete.
+- Do not invoke patch/edit tools with an empty or placeholder payload. Incomplete or empty patch payloads can leave the UI stuck at "Preparing patch...".
+- Before applying a patch or edit, verify it includes the intended file operation and at least one concrete change.
+- If no change is ready, stop and explain what is missing instead of sending an empty patch/edit request.
 
 Default workflow:
 
