@@ -2,6 +2,7 @@ param(
   [string]$InstallRoot = "$env:LOCALAPPDATA\de-opencode",
   [string]$Python = "python",
   [switch]$SetUserEnvironment,
+  [switch]$NoSetUserEnvironment,
   [switch]$SkipSmoke
 )
 
@@ -66,15 +67,24 @@ exit `$LASTEXITCODE
 
 Write-Step "Generated wrappers in $BinDir"
 
+$env:OPENCODE_CONFIG_DIR = $InstallRoot
+$env:PATH = "$BinDir;$env:PATH"
+
+$ShouldSetUserEnvironment = -not $NoSetUserEnvironment
 if ($SetUserEnvironment) {
+  $ShouldSetUserEnvironment = $true
+}
+
+if ($ShouldSetUserEnvironment) {
   [Environment]::SetEnvironmentVariable("OPENCODE_CONFIG_DIR", $InstallRoot, "User")
   $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
   if (($currentPath -split ";") -notcontains $BinDir) {
     [Environment]::SetEnvironmentVariable("Path", "$currentPath;$BinDir", "User")
   }
   Write-Step "Set user OPENCODE_CONFIG_DIR and appended wrapper bin to user PATH"
+  Write-Step "Restart PowerShell/OpenCode so the new user environment is visible everywhere"
 } else {
-  Write-Step "To use in this shell:"
+  Write-Step "User environment update skipped. To use in this shell:"
   Write-Host "  `$env:OPENCODE_CONFIG_DIR = '$InstallRoot'"
   Write-Host "  `$env:PATH = '$BinDir;' + `$env:PATH"
 }

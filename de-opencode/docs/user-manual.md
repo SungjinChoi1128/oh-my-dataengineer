@@ -27,15 +27,18 @@ Run from the package directory:
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-Optional user-level environment setup:
+The installer sets user-level `OPENCODE_CONFIG_DIR` and wrapper `Path` by default. Restart PowerShell/OpenCode after install.
+
+To skip user-level environment changes:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1 -SetUserEnvironment
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -NoSetUserEnvironment
 ```
 
 Then open a new terminal and run:
 
 ```powershell
+de hooks
 de doctor
 de auth
 de workbench capabilities

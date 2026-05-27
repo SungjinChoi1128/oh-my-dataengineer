@@ -89,7 +89,10 @@ Windows 11:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install.ps1
+de hooks
 ```
+
+The installer sets `OPENCODE_CONFIG_DIR` and the wrapper `bin` directory at user level by default. Restart PowerShell/OpenCode after install so hooks and custom tools are visible in new sessions.
 
 WSL/macOS/Linux-style shell:
 

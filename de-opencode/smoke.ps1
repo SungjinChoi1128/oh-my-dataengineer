@@ -20,6 +20,10 @@ Assert-Exists (Join-Path $ToolDir "de_config.py")
 
 & $Python (Join-Path $ToolDir "de.py") doctor | Out-Null
 & $Python (Join-Path $ToolDir "de_config.py") doctor | Out-Null
+if (Get-Command opencode -ErrorAction SilentlyContinue) {
+  $env:OPENCODE_CONFIG_DIR = $InstallRoot
+  & $Python (Join-Path $ToolDir "de.py") hooks | Out-Null
+}
 & $Python (Join-Path $ToolDir "de.py") databricks runtime-advisor --current-runtime "15.4" --target-runtime "16.4" | Out-Null
 & $Python (Join-Path $ToolDir "de_databricks.py") bundle-doctor --bundle-yaml (Join-Path $InstallRoot "samples\databricks-bundle\databricks.good.yml") | Out-Null
 & $Python (Join-Path $ToolDir "de_dbsql.py") classify --sql "SELECT 1" | Out-Null

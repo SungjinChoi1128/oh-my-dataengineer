@@ -12,15 +12,24 @@ Native Windows path:
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-For user-level environment setup:
+The installer sets user-level `OPENCODE_CONFIG_DIR` and adds the wrapper `bin` directory to the user `Path` by default. Restart PowerShell/OpenCode after install.
+
+To verify OpenCode is actually loading the hooks and custom tools:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1 -SetUserEnvironment
+de hooks
+```
+
+To install without changing user environment variables, use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -NoSetUserEnvironment
 ```
 
 Then open a new terminal and run:
 
 ```powershell
+de hooks
 de-config doctor
 de doctor
 de auth

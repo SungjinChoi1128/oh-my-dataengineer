@@ -6,8 +6,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 6497,
-      "sha256": "368a28f1525b5d089e4a3abca16f9de9e7e03b9654ed5ad15ea2a68bb3a378f1"
+      "bytes": 6703,
+      "sha256": "8aef808f098340c9ee5f8c70e85467d0d0a5e92740fe13792763d00b7fea9411"
     },
     {
       "path": "VERSION",
@@ -86,8 +86,8 @@
     },
     {
       "path": "docs/user-manual.md",
-      "bytes": 18293,
-      "sha256": "a14b6decec096a80f0b11dcec6c926411b62caffde0b84a2eece85e7ccd70eed"
+      "bytes": 18432,
+      "sha256": "eb06346fddda6dd4498e5a3c382d855d09af540de705a45af340ad9039974fc9"
     },
     {
       "path": "docs/ux-guide.md",
@@ -101,8 +101,8 @@
     },
     {
       "path": "docs/windows-11-install.md",
-      "bytes": 1963,
-      "sha256": "32205f18886211bfed49277df27ead3d1925e41f20ea0f4728c82e06b072b5ab"
+      "bytes": 2261,
+      "sha256": "5f81727de91f7ac6d7cd8e3bafdbd54f2073a322300de17a63e7688b923d5c17"
     },
     {
       "path": "docs/workbench.md",
@@ -116,8 +116,8 @@
     },
     {
       "path": "install.ps1",
-      "bytes": 3172,
-      "sha256": "ac5d5e840d5b816c2272e1defa4058b495c917856a0ba3829f8d67cc161249c3"
+      "bytes": 3531,
+      "sha256": "1f8191b73e29fa0b0285fd97596f7373c22950fdb427e33c94e39a2129d762c9"
     },
     {
       "path": "opencode.json",
@@ -211,8 +211,8 @@
     },
     {
       "path": "smoke.ps1",
-      "bytes": 4047,
-      "sha256": "9a5796ee9b850b48e6d3e412e3c0dc8c2b98bc03a810252de4ec5177b83154a3"
+      "bytes": 4207,
+      "sha256": "b546e24733846d375b7130a68fd895da24480d98f2d578f78ecaef6ced0e8320"
     },
     {
       "path": "templates/azure-pipelines/databricks-bundle-ci.yml",
@@ -221,8 +221,8 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 13412,
-      "sha256": "f3084bce5945c4b5db578b1bae770432becc68f2b9db1f2e19dd4b61c195cc13"
+      "bytes": 13816,
+      "sha256": "69d29efe6c2ab35c1dc281d44a477d6f6fbcd9c215bc85667140d0a0c217e8ba"
     },
     {
       "path": "tests/smoke.py",
@@ -236,8 +236,8 @@
     },
     {
       "path": "tools/de.py",
-      "bytes": 47866,
-      "sha256": "0c10433a746a81408aa2262064d394dd3d388fab5ba60c98f216cdf6f5588c0d"
+      "bytes": 49357,
+      "sha256": "39e7131bbebd881cd594424b11713c630f9b94a363e34e8fb0485952c2c553b4"
     },
     {
       "path": "tools/de_ado.py",
@@ -246,8 +246,8 @@
     },
     {
       "path": "tools/de_config.py",
-      "bytes": 10919,
-      "sha256": "5aaf9f56f3d0be67a358432d4bbccb040feecd319d624e9c3b21acc57274951a"
+      "bytes": 16269,
+      "sha256": "01ae6bd694415c05212066b7f2eda9dfd98cd1caf3be14a341cfaf6c2d2e32ac"
     },
     {
       "path": "tools/de_databricks.py",

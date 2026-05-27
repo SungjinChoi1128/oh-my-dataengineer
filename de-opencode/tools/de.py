@@ -195,6 +195,36 @@ def cmd_auth(args: argparse.Namespace) -> int:
     return code
 
 
+def render_hooks_text(data: Dict) -> str:
+    checks = data.get("checks", {})
+    lines = ["de-opencode Hook Doctor", ""]
+    lines.append(f"Status: {str(data.get('status', 'unknown')).upper()}")
+    lines.append("")
+    lines.append("Current OpenCode launch:")
+    lines.append(f"- OPENCODE_CONFIG_DIR: {checks.get('env_OPENCODE_CONFIG_DIR') or '<not set>'}")
+    lines.append(f"- points to package: {checks.get('env_points_to_package')}")
+    lines.append(f"- plugin loaded: {checks.get('current_config_plugin_loaded')}")
+    lines.append(f"- custom tools visible: {checks.get('current_agent_custom_tools_visible')}")
+    lines.append("")
+    lines.append("Package files:")
+    lines.append(f"- package root: {checks.get('package_root')}")
+    lines.append(f"- plugin file exists: {checks.get('plugin_file_exists')}")
+    recommendations = data.get("recommendations", [])
+    if recommendations:
+        lines.append("")
+        lines.append("Fix:")
+        lines += [f"- {item}" for item in recommendations]
+    return "\n".join(lines)
+
+
+def cmd_hooks(args: argparse.Namespace) -> int:
+    code, data, _ = run_tool("de_config.py", ["hooks"], expect_failure=True)
+    text = render_hooks_text(data)
+    markdown = "# de-opencode Hook Doctor\n\n```text\n" + text + "\n```\n"
+    print_output(data, args.format, text, markdown)
+    return code
+
+
 def cmd_pipeline_doctor(args: argparse.Namespace) -> int:
     out_dir = args.out or (str(DEFAULT_EVIDENCE_DIR) if args.write_evidence else None)
     ledger = str(Path(out_dir) / "ledger.jsonl") if out_dir else ""
@@ -741,6 +771,9 @@ def build_parser() -> argparse.ArgumentParser:
     auth = sub.add_parser("auth", help="Show enterprise auth posture")
     add_format_arg(auth)
     auth.set_defaults(func=cmd_auth)
+    hooks = sub.add_parser("hooks", help="Verify OpenCode plugin/hook loading")
+    add_format_arg(hooks)
+    hooks.set_defaults(func=cmd_hooks)
     done = sub.add_parser("done", help="Give a ready/needs-evidence/blocked data-engineering completion verdict")
     add_done_args(done)
     done.set_defaults(func=cmd_quality_verdict)
