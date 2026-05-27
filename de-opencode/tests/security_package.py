@@ -24,6 +24,7 @@ def main() -> int:
     assert permissions["read"]["*.env.*"] == "deny"
     assert permissions["read"][".databrickscfg"] == "deny"
     assert permissions["edit"] == "allow"
+    assert permissions["todowrite"] == "allow"
     assert permissions["task"]["*"] == "deny"
     assert permissions["task"]["data-architect"] == "ask"
     assert permissions["task"]["data-devops"] == "ask"
@@ -93,13 +94,17 @@ def main() -> int:
     assert permissions["bash"]["de-quality verdict *"] == "allow"
 
     agent = config["agent"]["data-engineer"]
-    assert agent["steps"] <= 24
+    assert agent["steps"] == 80
     assert agent["permission"]["edit"] == "allow"
+    assert agent["permission"]["todowrite"] == "allow"
     assert agent["permission"]["task"]["*"] == "deny"
     assert agent["permission"]["task"]["data-architect"] == "allow"
     assert agent["permission"]["task"]["data-devops"] == "allow"
     assert config["agent"]["data-architect"]["permission"]["edit"] == "deny"
+    assert config["agent"]["data-architect"]["steps"] == 12
     assert config["agent"]["data-devops"]["permission"]["edit"] == "allow"
+    assert config["agent"]["data-devops"]["permission"]["todowrite"] == "allow"
+    assert config["agent"]["data-devops"]["steps"] == 48
     assert config["agent"]["data-devops"]["permission"]["bash"]["de databricks bundle-doctor *"] == "allow"
 
     plugin = read("plugins/de-guardrails.ts")
@@ -159,9 +164,11 @@ def main() -> int:
     assert (ROOT / "commands" / "de-done.md").exists()
     assert (ROOT / "commands" / "de-pipeline-fix.md").exists()
     assert "edit: allow" in read("agents/data-engineer.md")
+    assert "todowrite: allow" in read("agents/data-engineer.md")
     assert "de_workbench_route" in read("agents/data-engineer.md")
     assert "Route `data-devops` for Azure Pipeline failures" in read("agents/data-engineer.md")
     assert "edit: allow" in read("agents/data-devops.md")
+    assert "todowrite: allow" in read("agents/data-devops.md")
     assert "edit: deny" in read("agents/data-architect.md")
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.good.yml").exists()
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.bad.yml").exists()

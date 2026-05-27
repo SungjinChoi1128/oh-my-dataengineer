@@ -1,9 +1,10 @@
 ---
 description: CI/CD specialist for Azure Pipelines, Databricks bundles, release evidence, and deployment troubleshooting.
 mode: subagent
-steps: 16
+steps: 48
 permission:
   edit: allow
+  todowrite: allow
   task: deny
   bash:
     "*": ask

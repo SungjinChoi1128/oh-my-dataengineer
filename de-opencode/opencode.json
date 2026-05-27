@@ -15,6 +15,7 @@
     "grep": "allow",
     "glob": "allow",
     "edit": "allow",
+    "todowrite": "allow",
     "external_directory": "ask",
     "webfetch": "ask",
     "websearch": "ask",
@@ -173,9 +174,10 @@
     "data-engineer": {
       "mode": "primary",
       "description": "Default data engineering agent for ADO, Databricks, MSSQL, CI/CD, migration, and QA-gated implementation work.",
-      "steps": 24,
+      "steps": 80,
       "permission": {
         "edit": "allow",
+        "todowrite": "allow",
         "task": {
           "*": "deny",
           "data-architect": "allow",
@@ -228,9 +230,10 @@
     "data-devops": {
       "mode": "subagent",
       "description": "CI/CD specialist for Azure Pipelines, Databricks bundles, release evidence, and deployment troubleshooting.",
-      "steps": 16,
+      "steps": 48,
       "permission": {
         "edit": "allow",
+        "todowrite": "allow",
         "task": "deny",
         "bash": {
           "*": "ask",

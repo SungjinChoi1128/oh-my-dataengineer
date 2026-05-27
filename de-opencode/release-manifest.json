@@ -6,8 +6,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 6001,
-      "sha256": "0a297eba4acd49a0f9d49cbb610c389d35d33c2cd680954833d7eca293019afc"
+      "bytes": 6217,
+      "sha256": "8397e23ffaba327e2d4305905be7b6e8d67c7fe8eba087e93e3998a1022fe32c"
     },
     {
       "path": "VERSION",
@@ -21,13 +21,13 @@
     },
     {
       "path": "agents/data-devops.md",
-      "bytes": 1643,
-      "sha256": "73c53d075fcd824d741e6c9b4c507900f0074cd96051836d713c10857ace7d1b"
+      "bytes": 1662,
+      "sha256": "403ac54f9179212a9494eaaeaa921ebdf4874f96a5923b5694df353de697bf8f"
     },
     {
       "path": "agents/data-engineer.md",
-      "bytes": 6197,
-      "sha256": "f2642c0e176980ac50a7c3f6286d5f897a90dc1ed8f9064fe4502b6bc1da8454"
+      "bytes": 6216,
+      "sha256": "83f8970a168b3c99c3a578763aec68fb1b7a53c6cc0d61b34644f577410eca59"
     },
     {
       "path": "commands/de-done.md",
@@ -81,13 +81,13 @@
     },
     {
       "path": "docs/security-model.md",
-      "bytes": 2135,
-      "sha256": "25f7b7489aaaab8ada3eeac17783e6741d02e4bbb4ed57884a8fd01c58b2bf6c"
+      "bytes": 2179,
+      "sha256": "77eb195425927e7def76bbaf3349d668e92d87a69957001b3f3b81066b9fa8f9"
     },
     {
       "path": "docs/user-manual.md",
-      "bytes": 17997,
-      "sha256": "88b9a5e2e1783d319503382ba2f628da8d469bf1fccf4ecb64e3c978174b8b3b"
+      "bytes": 18108,
+      "sha256": "10b72c2b3811382b992d5dfa19d3ddac9ce6e085a47602430715fa640e6c1725"
     },
     {
       "path": "docs/ux-guide.md",
@@ -106,8 +106,8 @@
     },
     {
       "path": "docs/workbench.md",
-      "bytes": 2869,
-      "sha256": "be2eab14f25bef8a39d62a81fe2ca2db9403521c183e4c1d8047a388e3b0fca8"
+      "bytes": 3032,
+      "sha256": "dc771a2c1d65968ddca197a552ee0571e30312ce6b061407ce8f16502912ceec"
     },
     {
       "path": "install-wsl.sh",
@@ -121,8 +121,8 @@
     },
     {
       "path": "opencode.json",
-      "bytes": 9274,
-      "sha256": "f1cf03d350498db9bade4879f2910f2bc346643edc351964c5855820458a1f6e"
+      "bytes": 9360,
+      "sha256": "30f5c8c13641cee1bf21a9920f43cff3804ad7b5fc4962fa37a17d096f35464e"
     },
     {
       "path": "plugins/de-guardrails.ts",
@@ -221,8 +221,8 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 12687,
-      "sha256": "6589d1deccfd25767dca2ae853f8d8d4de5c5730cf34c637b9a30dffa269a416"
+      "bytes": 13114,
+      "sha256": "948958d3738f658b40c0ec3f532ef26addda2efad90e1de5fce6058b297ce28d"
     },
     {
       "path": "tests/smoke.py",
