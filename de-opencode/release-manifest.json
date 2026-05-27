@@ -6,8 +6,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 6286,
-      "sha256": "364daf42922ececcec699b982248ef2e2aeb83ccbb4a84802c447c5e2c0caa98"
+      "bytes": 6497,
+      "sha256": "368a28f1525b5d089e4a3abca16f9de9e7e03b9654ed5ad15ea2a68bb3a378f1"
     },
     {
       "path": "VERSION",
@@ -16,18 +16,18 @@
     },
     {
       "path": "agents/data-architect.md",
-      "bytes": 1534,
-      "sha256": "0384e888520ab9fc408ebc296d01feee94474b817b2672572182ac32d43d9bf5"
+      "bytes": 1729,
+      "sha256": "0b37ad69793c01db0463dd44ba0feb42f0da09f63748630528e1ff2db7d3117b"
     },
     {
       "path": "agents/data-devops.md",
-      "bytes": 1663,
-      "sha256": "24679948ce3240e585a5b966913d4003a1f5b59058b435ec700db11d338e183c"
+      "bytes": 1985,
+      "sha256": "ba735693a4c627bb571efc1d298c400a2e271bdad42a957f3cf3f446eed887a4"
     },
     {
       "path": "agents/data-engineer.md",
-      "bytes": 6217,
-      "sha256": "de2804883e3136df053196b304e8b784976f7db1603533be6f6a0a1ae02d4547"
+      "bytes": 6636,
+      "sha256": "a97bdf25f7c3af6f13ca903d7a6838265103d7830b8a459279f46dd4f76ef85f"
     },
     {
       "path": "commands/de-done.md",
@@ -86,8 +86,8 @@
     },
     {
       "path": "docs/user-manual.md",
-      "bytes": 18108,
-      "sha256": "10b72c2b3811382b992d5dfa19d3ddac9ce6e085a47602430715fa640e6c1725"
+      "bytes": 18293,
+      "sha256": "a14b6decec096a80f0b11dcec6c926411b62caffde0b84a2eece85e7ccd70eed"
     },
     {
       "path": "docs/ux-guide.md",
@@ -221,8 +221,8 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 13117,
-      "sha256": "beaed138d70d3bd9505266f61f2e8acbeb2f8e74a20071733e4bb4561e661d64"
+      "bytes": 13412,
+      "sha256": "f3084bce5945c4b5db578b1bae770432becc68f2b9db1f2e19dd4b61c195cc13"
     },
     {
       "path": "tests/smoke.py",

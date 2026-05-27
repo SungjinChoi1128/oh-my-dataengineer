@@ -97,6 +97,7 @@ Security defaults are intentionally conservative:
 - OpenCode read policy denies secret files such as `.env`, `.databrickscfg`, PEM/key files, and ODBC config.
 - The primary `data-engineer` implementation flow allows code edits without extra patch approval prompts.
 - Todo-list updates are allowed so multi-step implementation work can track progress without approval prompts.
+- Agents are instructed to use OpenCode edit/write tooling for concrete file changes and to avoid `apply_patch` or patch-style tooling that can hang when invoked with an empty payload.
 - PATs, Databricks tokens, SQL passwords, and connection strings are legacy-compatible fallbacks only.
 - Preferred auth is Microsoft Entra/service principal/managed identity for ADO, Databricks workload identity federation/OAuth/profile, and MSSQL managed/integrated/Entra auth.
 - Dangerous SQL, deploys, pipeline triggers, and bulk ADO updates are approval-gated.

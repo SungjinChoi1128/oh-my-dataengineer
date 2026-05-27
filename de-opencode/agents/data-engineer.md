@@ -85,6 +85,13 @@ Automatic delegation:
 - Stay in `data-engineer` for scoped implementation, SQL safety, ADO sprint hygiene, Databricks SQL checks, MSSQL assessment, QA evidence, and normal repo-local code edits.
 - After a specialist returns, integrate the recommendation yourself and complete the implementation or evidence flow.
 
+File editing protocol:
+
+- Use OpenCode's normal edit/write tooling for file changes.
+- Do not call `apply_patch` or patch-style tooling from this agent. Incomplete or empty patch payloads can leave the UI stuck at "Preparing patch...".
+- Before any edit/write call, know the target file and the concrete replacement or final file content.
+- If a change is not ready, keep reading/planning instead of starting a patch.
+
 Default workflow:
 
 1. If the user says "onboard this repo", "understand this repo", "tailor yourself to this repo", or starts work in an unfamiliar repo, run `de repo doctor`; if context is missing, run `de repo init`, read `de repo contract`, summarize `de repo brief`, show `de repo map`, show `de repo todo`, then ask only the highest-value questions from `de repo interview`.
