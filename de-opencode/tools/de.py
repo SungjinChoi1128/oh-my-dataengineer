@@ -474,6 +474,20 @@ def render_workbench_text(title: str, data: Dict) -> str:
         lines.append(f"- when: {primary.get('when')}")
         lines += ["", "Suggested commands:"]
         lines += [f"- {cmd}" for cmd in primary.get("commands", [])]
+    if "route" in data:
+        route = data["route"]
+        lines += ["", f"Agent route: {route.get('agent')}"]
+        lines.append(f"- decision: {route.get('decision')}")
+        lines.append(f"- confidence: {route.get('confidence')}")
+        lines.append(f"- lane: {route.get('lane')}")
+        lines.append(f"- reason: {route.get('reason')}")
+        triggers = route.get("matched_triggers", [])
+        if triggers:
+            lines.append(f"- matched: {', '.join(triggers)}")
+        first_moves = route.get("first_moves", [])
+        if first_moves:
+            lines += ["", "First moves:"]
+            lines += [f"- {item}" for item in first_moves]
     if "skills" in data:
         lines += ["", "Skills:"]
         for skill in data["skills"]:
@@ -522,6 +536,7 @@ def cmd_workbench_proxy(args: argparse.Namespace) -> int:
     tool_args = [args.workbench_command]
     mapping = {
         "triage": [("--request", getattr(args, "request", None))],
+        "route": [("--request", getattr(args, "request", None))],
         "capabilities": [("--domain", getattr(args, "domain", None))],
         "ado-refine": [("--items-file", getattr(args, "items_file", None))],
         "ado-bulk-preview": [("--file", getattr(args, "file", None)), ("--out", getattr(args, "out", None))],
@@ -542,6 +557,7 @@ def cmd_workbench_proxy(args: argparse.Namespace) -> int:
         "catalog": "Workbench Catalog",
         "capabilities": "Capability Catalog",
         "triage": "Task Triage",
+        "route": "Agent Route",
         "ado-refine": "ADO Backlog Refinement",
         "ado-bulk-preview": "ADO Bulk Preview",
         "mssql-assess": "MSSQL Assessment",
@@ -814,6 +830,10 @@ def build_parser() -> argparse.ArgumentParser:
     wb_triage.add_argument("--request", required=True)
     add_format_arg(wb_triage)
     wb_triage.set_defaults(func=cmd_workbench_proxy)
+    wb_route = workbench_sub.add_parser("route", help="Route a request to the right OpenCode agent")
+    wb_route.add_argument("--request", required=True)
+    add_format_arg(wb_route)
+    wb_route.set_defaults(func=cmd_workbench_proxy)
 
     ado = sub.add_parser("ado", help="ADO sprint, backlog, and work-item workflows")
     ado_sub = ado.add_subparsers(dest="ado_command", required=True)

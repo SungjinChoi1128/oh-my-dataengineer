@@ -120,6 +120,92 @@ CAPABILITIES = [
     },
 ]
 
+ROUTE_RULES = [
+    {
+        "agent": "data-devops",
+        "decision": "delegate",
+        "confidence": "high",
+        "lane": "ci-cd",
+        "triggers": [
+            "azure pipeline",
+            "ado pipeline",
+            "pipeline failed",
+            "build failed",
+            "release failed",
+            "deployment failed",
+            "bundle deploy",
+            "bundle validate",
+            "databricks bundle",
+            "service connection",
+            "variable group",
+            "artifact",
+            "yaml",
+        ],
+        "reason": "CI/CD, Azure Pipelines, Databricks bundle, build-log, release, or deployment troubleshooting should be handled by the DevOps specialist.",
+        "first_moves": [
+            "Run `de pipeline doctor` or `de_pipeline_diagnose` when a pipeline log/YAML is available.",
+            "Run `de databricks bundle-doctor` before Databricks bundle reruns or deploy fixes.",
+            "Do not trigger production pipelines or deploy bundles without explicit approval.",
+        ],
+    },
+    {
+        "agent": "data-architect",
+        "decision": "delegate",
+        "confidence": "high",
+        "lane": "architecture",
+        "triggers": [
+            "architecture",
+            "architect",
+            "data model",
+            "domain model",
+            "migration design",
+            "cutover",
+            "governance",
+            "unity catalog design",
+            "catalog layout",
+            "lineage",
+            "ownership",
+            "boundary",
+            "data contract",
+            "operational risk",
+            "platform design",
+        ],
+        "reason": "Architecture, migration shape, governance, ownership, data contracts, and operational risk need read-only design review before implementation.",
+        "first_moves": [
+            "Read `de repo contract`, `de repo map`, and `de repo brief` when repo context exists.",
+            "Review boundaries, data contracts, migration risk, Unity Catalog layout, and rollback/recovery assumptions.",
+            "Recommend concrete changes but keep implementation with `data-engineer` unless the user asked for a review only.",
+        ],
+    },
+    {
+        "agent": "data-engineer",
+        "decision": "direct",
+        "confidence": "medium",
+        "lane": "implementation",
+        "triggers": [
+            "implement",
+            "fix code",
+            "change code",
+            "refactor",
+            "test",
+            "sql",
+            "mssql",
+            "databricks sql",
+            "backlog",
+            "sprint",
+            "work item",
+            "quality",
+            "qa",
+        ],
+        "reason": "Normal scoped implementation, SQL safety checks, ADO sprint hygiene, QA evidence, and small repo-local edits should stay with the primary data-engineer agent.",
+        "first_moves": [
+            "Use repo context when available and run read-only discovery before edits.",
+            "Classify or dry-run SQL/pipeline/write operations before live execution.",
+            "Run `de done` or `de quality verdict` before claiming completion.",
+        ],
+    },
+]
+
 
 def read_json(path: str) -> object:
     return json.loads(Path(path).read_text(encoding="utf-8"))
@@ -192,6 +278,74 @@ def cmd_triage(args: argparse.Namespace) -> int:
     }
     print(json.dumps(result, indent=2))
     return 0
+
+
+def cmd_route(args: argparse.Namespace) -> int:
+    result = route_request(args.request)
+    print(json.dumps(result, indent=2))
+    return 0
+
+
+def route_request(request: str) -> Dict[str, object]:
+    text = request.lower()
+    scored = []
+    for rule in ROUTE_RULES:
+        hits = [trigger for trigger in rule["triggers"] if trigger in text]
+        if hits:
+            item = {key: value for key, value in rule.items() if key != "triggers"}
+            item["score"] = len(hits)
+            item["matched_triggers"] = hits
+            scored.append(item)
+    if not scored:
+        fallback = next(rule for rule in ROUTE_RULES if rule["agent"] == "data-engineer")
+        scored = [{
+            key: value for key, value in fallback.items() if key != "triggers"
+        }]
+        scored[0]["confidence"] = "low"
+        scored[0]["score"] = 0
+        scored[0]["matched_triggers"] = []
+    scored.sort(key=lambda item: route_priority(item), reverse=True)
+    primary = scored[0]
+    route = {
+        "status": "ok",
+        "request": request,
+        "route": {
+            "agent": primary["agent"],
+            "decision": primary["decision"],
+            "confidence": primary["confidence"],
+            "lane": primary["lane"],
+            "reason": primary["reason"],
+            "matched_triggers": primary["matched_triggers"],
+            "first_moves": primary["first_moves"],
+        },
+        "related": [
+            {
+                "agent": item["agent"],
+                "decision": item["decision"],
+                "confidence": item["confidence"],
+                "lane": item["lane"],
+                "reason": item["reason"],
+                "matched_triggers": item["matched_triggers"],
+            }
+            for item in scored[1:3]
+        ],
+        "routing_contract": [
+            "Use data-devops for pipeline/build/release/bundle failures.",
+            "Use data-architect for architecture, migration design, governance, and operational-risk review.",
+            "Use data-engineer directly for scoped implementation, SQL safety, ADO sprint hygiene, QA evidence, and repo-local code edits.",
+        ],
+    }
+    return route
+
+
+def route_priority(item: Dict[str, object]) -> int:
+    base = int(item.get("score", 0))
+    agent = item.get("agent")
+    if agent == "data-devops":
+        return base * 10 + 30
+    if agent == "data-architect":
+        return base * 10 + 20
+    return base * 10 + 10
 
 
 def cmd_ado_refine(args: argparse.Namespace) -> int:
@@ -406,6 +560,9 @@ def build_parser() -> argparse.ArgumentParser:
     triage = sub.add_parser("triage", help="Route a request to the right data-engineering workflow")
     triage.add_argument("--request", required=True)
     triage.set_defaults(func=cmd_triage)
+    route = sub.add_parser("route", help="Route a request to the right OpenCode agent")
+    route.add_argument("--request", required=True)
+    route.set_defaults(func=cmd_route)
     ado_refine = sub.add_parser("ado-refine", help="Generate backlog refinement findings from work item JSON/CSV")
     ado_refine.add_argument("--items-file", required=True)
     ado_refine.set_defaults(func=cmd_ado_refine)

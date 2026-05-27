@@ -233,6 +233,17 @@ def main() -> int:
     assert "Capability Catalog: OK" in umbrella_capabilities
     triage = assert_json(run_tool("de_workbench.py", "triage", "--request", "refine sprint backlog and bulk update ADO tasks"))
     assert triage["primary"]["skill"] == "de-ado-devops"
+    route_pipeline = assert_json(run_tool("de_workbench.py", "route", "--request", "fix failed Azure Pipeline deploying a Databricks bundle"))
+    assert route_pipeline["route"]["agent"] == "data-devops"
+    assert route_pipeline["route"]["decision"] == "delegate"
+    route_architecture = assert_json(run_tool("de_workbench.py", "route", "--request", "review migration design and Unity Catalog governance risk"))
+    assert route_architecture["route"]["agent"] == "data-architect"
+    assert route_architecture["route"]["decision"] == "delegate"
+    route_direct = assert_json(run_tool("de_workbench.py", "route", "--request", "implement a small SQL classification test"))
+    assert route_direct["route"]["agent"] == "data-engineer"
+    umbrella_route = run_tool("de.py", "workbench", "route", "--request", "pipeline build failed after bundle validate")
+    assert "Agent Route: OK" in umbrella_route
+    assert "Agent route: data-devops" in umbrella_route
     sprint_items = ROOT / "samples" / "ado-work-items" / "sprint-items.json"
     refine = assert_json(run_tool("de_workbench.py", "ado-refine", "--items-file", str(sprint_items), expect=1))
     assert refine["status"] == "needs-refinement"

@@ -11,10 +11,21 @@ de repo brief
 de repo todo
 de workbench catalog
 de workbench capabilities
+de workbench route --request "fix failed Azure Pipeline deploying Databricks bundle"
 de workbench triage --request "refine sprint backlog for Databricks migration"
 ```
 
 Use `de repo init` when first entering a client repo. It creates reviewable `.de-opencode/*` context artifacts so the agent can understand repo shape, a compact DE contract, short next actions, important files, risk zones, and safe commands.
+
+## Agent Routing
+
+`de workbench route` is the lightweight routing gate for OpenCode agents:
+
+- `data-devops`: Azure Pipeline failures, build logs, release evidence, Databricks bundle validate/deploy/run issues, service connections, variable groups, and CI/CD YAML fixes.
+- `data-architect`: architecture review, migration design, Unity Catalog layout, governance, ownership, data contracts, cutover, rollback, and operational-risk review.
+- `data-engineer`: scoped implementation, SQL safety, ADO sprint hygiene, Databricks SQL/MSSQL checks, QA evidence, and normal repo-local code edits.
+
+The primary `data-engineer` agent is allowed to invoke only `data-devops` and `data-architect` automatically, so routing is stronger without adding a large agent hierarchy.
 
 ## ADO Sprint / Backlog
 

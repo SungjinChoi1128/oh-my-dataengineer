@@ -43,6 +43,7 @@ def main() -> int:
     assert permissions["de_repo_interview"] == "allow"
     assert permissions["de_workbench_catalog"] == "allow"
     assert permissions["de_workbench_capabilities"] == "allow"
+    assert permissions["de_workbench_route"] == "allow"
     assert permissions["de_workbench_ado_refine"] == "allow"
     assert permissions["de_workbench_ado_bulk_preview"] == "allow"
     assert permissions["de_workbench_mssql_assess"] == "allow"
@@ -88,12 +89,15 @@ def main() -> int:
     assert permissions["bash"]["de-repo interview*"] == "allow"
     assert permissions["bash"]["de-repo install-contract*"] == "ask"
     assert permissions["bash"]["de workbench capabilities*"] == "allow"
+    assert permissions["bash"]["de workbench route *"] == "allow"
     assert permissions["bash"]["de-quality verdict *"] == "allow"
 
     agent = config["agent"]["data-engineer"]
     assert agent["steps"] <= 24
     assert agent["permission"]["edit"] == "allow"
     assert agent["permission"]["task"]["*"] == "deny"
+    assert agent["permission"]["task"]["data-architect"] == "allow"
+    assert agent["permission"]["task"]["data-devops"] == "allow"
     assert config["agent"]["data-architect"]["permission"]["edit"] == "deny"
     assert config["agent"]["data-devops"]["permission"]["edit"] == "allow"
     assert config["agent"]["data-devops"]["permission"]["bash"]["de databricks bundle-doctor *"] == "allow"
@@ -118,6 +122,7 @@ def main() -> int:
         "de_workbench_catalog",
         "de_workbench_capabilities",
         "de_workbench_triage",
+        "de_workbench_route",
         "de_workbench_ado_refine",
         "de_workbench_ado_bulk_preview",
         "de_workbench_mssql_assess",
@@ -154,6 +159,8 @@ def main() -> int:
     assert (ROOT / "commands" / "de-done.md").exists()
     assert (ROOT / "commands" / "de-pipeline-fix.md").exists()
     assert "edit: allow" in read("agents/data-engineer.md")
+    assert "de_workbench_route" in read("agents/data-engineer.md")
+    assert "Route `data-devops` for Azure Pipeline failures" in read("agents/data-engineer.md")
     assert "edit: allow" in read("agents/data-devops.md")
     assert "edit: deny" in read("agents/data-architect.md")
     assert (ROOT / "samples" / "ado-pipeline" / "azure-pipelines.good.yml").exists()
@@ -235,6 +242,10 @@ def main() -> int:
         ])
     )
     for path in ROOT.rglob("*"):
+        if "node_modules" in path.parts or "__pycache__" in path.parts:
+            continue
+        if path.suffix == ".swp":
+            continue
         if path.relative_to(ROOT).as_posix() == "tests/security_package.py":
             continue
         if path.is_file() and path.suffix.lower() in {".md", ".json", ".ts", ".ps1", ".sh", ".py", ".txt"}:

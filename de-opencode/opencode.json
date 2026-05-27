@@ -43,6 +43,7 @@
     "de_workbench_catalog": "allow",
     "de_workbench_capabilities": "allow",
     "de_workbench_triage": "allow",
+    "de_workbench_route": "allow",
     "de_workbench_ado_refine": "allow",
     "de_workbench_ado_bulk_preview": "allow",
     "de_workbench_mssql_assess": "allow",
@@ -68,6 +69,7 @@
       "de workbench catalog*": "allow",
       "de workbench capabilities*": "allow",
       "de workbench triage *": "allow",
+      "de workbench route *": "allow",
       "de ado refine *": "allow",
       "de ado bulk preview *": "allow",
       "de mssql assess *": "allow",
@@ -130,6 +132,7 @@
       "de-workbench catalog*": "allow",
       "de-workbench capabilities*": "allow",
       "de-workbench triage *": "allow",
+      "de-workbench route *": "allow",
       "de-workbench ado-refine *": "allow",
       "de-workbench ado-bulk-preview *": "allow",
       "de-workbench mssql-assess *": "allow",
@@ -175,8 +178,8 @@
         "edit": "allow",
         "task": {
           "*": "deny",
-          "data-architect": "ask",
-          "data-devops": "ask"
+          "data-architect": "allow",
+          "data-devops": "allow"
         }
       }
     },
@@ -202,6 +205,7 @@
           "de workbench catalog*": "allow",
           "de workbench capabilities*": "allow",
           "de workbench triage *": "allow",
+          "de workbench route *": "allow",
           "de ado refine *": "allow",
           "de ado bulk preview *": "allow",
           "de mssql assess *": "allow",
@@ -243,6 +247,7 @@
           "de workbench catalog*": "allow",
           "de workbench capabilities*": "allow",
           "de workbench triage *": "allow",
+          "de workbench route *": "allow",
           "de ado refine *": "allow",
           "de ado bulk preview *": "allow",
           "de security checklist*": "allow",

@@ -11,8 +11,8 @@ from typing import List, Optional
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXCLUDE_DIRS = {"__pycache__", ".git", "ledger", ".de-opencode"}
-EXCLUDE_FILES = {"release-manifest.json"}
+EXCLUDE_DIRS = {"__pycache__", ".git", "ledger", ".de-opencode", "node_modules"}
+EXCLUDE_FILES = {"release-manifest.json", ".gitignore", "package.json", "package-lock.json", "bun.lock"}
 
 
 def sha256(path: Path) -> str:
@@ -29,6 +29,8 @@ def iter_files(root: Path) -> list:
         if any(part in EXCLUDE_DIRS for part in path.parts):
             continue
         if path.name in EXCLUDE_FILES:
+            continue
+        if path.suffix == ".swp":
             continue
         if path.is_file():
             files.append(path)

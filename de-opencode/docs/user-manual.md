@@ -71,6 +71,7 @@ de repo map
 de repo brief
 de workbench catalog
 de workbench capabilities
+de workbench route --request "fix failed Azure Pipeline deploying Databricks bundle"
 de security checklist --scope client-review
 ```
 
@@ -85,6 +86,7 @@ What they tell you:
 - `de repo brief`: show the detected repo shape, important files, risk zones, and safe commands.
 - `de workbench catalog`: what skills and workflows the package exposes.
 - `de workbench capabilities`: what ADO, Databricks, MSSQL, and migration capability is covered.
+- `de workbench route`: which OpenCode agent should own the request.
 - `de security checklist`: client-facing security answer and review checklist.
 
 ## Security Model
@@ -387,9 +389,11 @@ de done --claim "SQL update is safe" --environment prod --data-changed --sql-evi
 Set `OPENCODE_CONFIG_DIR` to the installed package directory when using OpenCode with this package. The included configuration provides:
 
 - `data-engineer`: primary agent for ADO, Databricks, MSSQL, migration, CI/CD, and QA-gated work.
-- `data-architect`: ask-gated architecture reviewer for migration, governance, and operational risk.
-- `data-devops`: ask-gated CI/CD specialist for Azure Pipelines and Databricks bundle release troubleshooting.
+- `data-architect`: read-only architecture reviewer for migration, governance, and operational risk.
+- `data-devops`: CI/CD specialist for Azure Pipelines and Databricks bundle release troubleshooting.
 - `de-guardrails.ts`: plugin hooks and custom tools for safer structured workflows.
+
+The primary `data-engineer` agent uses `de workbench route` / `de_workbench_route` for stronger routing. Pipeline/build/release/bundle failures should go to `data-devops`; architecture, migration-design, governance, and operational-risk review should go to `data-architect`; scoped implementation stays in `data-engineer`.
 
 Prefer the custom tools or `de` wrappers over raw shell commands whenever possible.
 

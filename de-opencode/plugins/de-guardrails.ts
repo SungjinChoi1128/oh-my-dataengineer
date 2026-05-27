@@ -254,6 +254,15 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
           return runPython($, "de_workbench.py", ["triage", "--request", args.request])
         },
       }),
+      de_workbench_route: tool({
+        description: "Route a data-engineering request to the right OpenCode agent: data-engineer, data-architect, or data-devops.",
+        args: {
+          request: tool.schema.string().describe("User request or task summary."),
+        },
+        async execute(args) {
+          return runPython($, "de_workbench.py", ["route", "--request", args.request])
+        },
+      }),
       de_workbench_ado_refine: tool({
         description: "Generate backlog refinement findings from exported ADO work item JSON/CSV.",
         args: {

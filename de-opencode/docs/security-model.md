@@ -11,7 +11,7 @@ This package is safe-by-default scaffolding for enterprise data-engineering work
 - Production deploys and data mutations require explicit approval.
 - Secret-provider commands are never invoked by `doctor`; explicit resolve commands can invoke them without printing secret values.
 - OpenCode permissions deny secret-file reads, allow normal code edits for the primary implementation flow, and ask-gate raw deployment, SQL, and pipeline mutation commands.
-- Subagent task delegation is limited to the architecture and DevOps lanes and is ask-gated.
+- Subagent task delegation is limited to the architecture and DevOps lanes. The primary agent may invoke only those two specialists automatically; arbitrary subagents remain denied.
 
 ## Preferred Auth
 
