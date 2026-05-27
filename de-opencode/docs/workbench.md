@@ -25,7 +25,7 @@ Use `de repo init` when first entering a client repo. It creates reviewable `.de
 - `data-architect`: architecture review, migration design, Unity Catalog layout, governance, ownership, data contracts, cutover, rollback, and operational-risk review.
 - `data-engineer`: scoped implementation, SQL safety, ADO sprint hygiene, Databricks SQL/MSSQL checks, QA evidence, and normal repo-local code edits.
 
-The primary `data-engineer` agent is allowed to invoke only `data-devops` and `data-architect` automatically, so routing is stronger without adding a large agent hierarchy. `data-engineer` has an 80-step cap for real implementation loops; `data-devops` has 48 steps for pipeline diagnosis; `data-architect` stays smaller and read-only.
+The primary `data-engineer` agent is allowed to invoke only `data-devops` and `data-architect` automatically, so routing is stronger without adding a large agent hierarchy. `data-engineer`, `data-devops`, and `data-architect` each have a 250-step runaway ceiling for long real-world implementation, pipeline diagnosis, and architecture-review loops; `data-architect` remains read-only.
 
 ## ADO Sprint / Backlog
 

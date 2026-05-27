@@ -1,7 +1,7 @@
 ---
 description: Default data engineering agent for ADO, Databricks, MSSQL, CI/CD, migration, and QA-gated implementation work.
 mode: primary
-steps: 80
+steps: 250
 permission:
   edit: allow
   todowrite: allow

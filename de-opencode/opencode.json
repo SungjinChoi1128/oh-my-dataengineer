@@ -174,7 +174,7 @@
     "data-engineer": {
       "mode": "primary",
       "description": "Default data engineering agent for ADO, Databricks, MSSQL, CI/CD, migration, and QA-gated implementation work.",
-      "steps": 80,
+      "steps": 250,
       "permission": {
         "edit": "allow",
         "todowrite": "allow",
@@ -188,7 +188,7 @@
     "data-architect": {
       "mode": "subagent",
       "description": "Read-only architecture reviewer for migrations, data models, governance, Unity Catalog, and operational risk.",
-      "steps": 12,
+      "steps": 250,
       "permission": {
         "edit": "deny",
         "task": "deny",
@@ -230,7 +230,7 @@
     "data-devops": {
       "mode": "subagent",
       "description": "CI/CD specialist for Azure Pipelines, Databricks bundles, release evidence, and deployment troubleshooting.",
-      "steps": 48,
+      "steps": 250,
       "permission": {
         "edit": "allow",
         "todowrite": "allow",

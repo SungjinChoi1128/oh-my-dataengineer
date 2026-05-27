@@ -6,8 +6,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 6217,
-      "sha256": "8397e23ffaba327e2d4305905be7b6e8d67c7fe8eba087e93e3998a1022fe32c"
+      "bytes": 6286,
+      "sha256": "364daf42922ececcec699b982248ef2e2aeb83ccbb4a84802c447c5e2c0caa98"
     },
     {
       "path": "VERSION",
@@ -16,18 +16,18 @@
     },
     {
       "path": "agents/data-architect.md",
-      "bytes": 1533,
-      "sha256": "97a0a6529aaa6b0539a9fa5635bd7ea272473b541d57484115bf09bca6ab78bf"
+      "bytes": 1534,
+      "sha256": "0384e888520ab9fc408ebc296d01feee94474b817b2672572182ac32d43d9bf5"
     },
     {
       "path": "agents/data-devops.md",
-      "bytes": 1662,
-      "sha256": "403ac54f9179212a9494eaaeaa921ebdf4874f96a5923b5694df353de697bf8f"
+      "bytes": 1663,
+      "sha256": "24679948ce3240e585a5b966913d4003a1f5b59058b435ec700db11d338e183c"
     },
     {
       "path": "agents/data-engineer.md",
-      "bytes": 6216,
-      "sha256": "83f8970a168b3c99c3a578763aec68fb1b7a53c6cc0d61b34644f577410eca59"
+      "bytes": 6217,
+      "sha256": "de2804883e3136df053196b304e8b784976f7db1603533be6f6a0a1ae02d4547"
     },
     {
       "path": "commands/de-done.md",
@@ -106,8 +106,8 @@
     },
     {
       "path": "docs/workbench.md",
-      "bytes": 3032,
-      "sha256": "dc771a2c1d65968ddca197a552ee0571e30312ce6b061407ce8f16502912ceec"
+      "bytes": 3082,
+      "sha256": "19bd517f980163b102e5461fb5f8f134db91a93412c63f448168118f542c2eda"
     },
     {
       "path": "install-wsl.sh",
@@ -121,8 +121,8 @@
     },
     {
       "path": "opencode.json",
-      "bytes": 9360,
-      "sha256": "30f5c8c13641cee1bf21a9920f43cff3804ad7b5fc4962fa37a17d096f35464e"
+      "bytes": 9363,
+      "sha256": "7cf82e2fb23c505ed2b0e8be9a491cac292cf1791d5683b7787bd93ca34af5fd"
     },
     {
       "path": "plugins/de-guardrails.ts",
@@ -221,8 +221,8 @@
     },
     {
       "path": "tests/security_package.py",
-      "bytes": 13114,
-      "sha256": "948958d3738f658b40c0ec3f532ef26addda2efad90e1de5fce6058b297ce28d"
+      "bytes": 13117,
+      "sha256": "beaed138d70d3bd9505266f61f2e8acbeb2f8e74a20071733e4bb4561e661d64"
     },
     {
       "path": "tests/smoke.py",

@@ -1,7 +1,7 @@
 ---
 description: Read-only architecture reviewer for migrations, data models, governance, Unity Catalog, and operational risk.
 mode: subagent
-steps: 12
+steps: 250
 permission:
   edit: deny
   task: deny

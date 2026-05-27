@@ -94,17 +94,17 @@ def main() -> int:
     assert permissions["bash"]["de-quality verdict *"] == "allow"
 
     agent = config["agent"]["data-engineer"]
-    assert agent["steps"] == 80
+    assert agent["steps"] == 250
     assert agent["permission"]["edit"] == "allow"
     assert agent["permission"]["todowrite"] == "allow"
     assert agent["permission"]["task"]["*"] == "deny"
     assert agent["permission"]["task"]["data-architect"] == "allow"
     assert agent["permission"]["task"]["data-devops"] == "allow"
     assert config["agent"]["data-architect"]["permission"]["edit"] == "deny"
-    assert config["agent"]["data-architect"]["steps"] == 12
+    assert config["agent"]["data-architect"]["steps"] == 250
     assert config["agent"]["data-devops"]["permission"]["edit"] == "allow"
     assert config["agent"]["data-devops"]["permission"]["todowrite"] == "allow"
-    assert config["agent"]["data-devops"]["steps"] == 48
+    assert config["agent"]["data-devops"]["steps"] == 250
     assert config["agent"]["data-devops"]["permission"]["bash"]["de databricks bundle-doctor *"] == "allow"
 
     plugin = read("plugins/de-guardrails.ts")
