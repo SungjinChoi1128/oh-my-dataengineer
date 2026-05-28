@@ -15,7 +15,6 @@ const secretFilePatterns = [
 const riskyCommandPatterns = [
   /databricks\s+bundle\s+deploy\b/i,
   /databricks\s+bundle\s+run\b/i,
-  /mssql-client\s+execute-/i,
   /\bsqlcmd\b/i,
   /ado-pipelines\s+run-trigger/i,
   /ado-work-items\s+(create|update|batch-update|from-json|from-template|create-story|create-tasks|add-comment|link-)/i,
@@ -25,6 +24,10 @@ const riskyCommandPatterns = [
   /\bDELETE\s+FROM\b/i,
   /\bUPDATE\s+\S+\s+SET\b/i,
   /\bMERGE\s+INTO\b/i,
+]
+
+const approvalDelegatedCommandPatterns = [
+  /mssql-client\s+execute-/i,
 ]
 
 export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
@@ -46,6 +49,17 @@ export const DataEngineeringGuardrails: Plugin = async ({ client, $ }) => {
 
       if (input.tool === "bash") {
         const command = String(output.args?.command || "")
+        const delegatedToPermissionPrompt = approvalDelegatedCommandPatterns.some((pattern) => pattern.test(command))
+        if (delegatedToPermissionPrompt) {
+          await client.app.log({
+            body: {
+              service: "de-guardrails",
+              level: "info",
+              message: "Delegating guarded data-engineering command to OpenCode permission prompt",
+              extra: { command_class: classifyCommand(command) },
+            },
+          })
+        }
         if (riskyCommandPatterns.some((pattern) => pattern.test(command))) {
           await client.app.log({
             body: {
